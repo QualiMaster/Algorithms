@@ -1,0 +1,6 @@
+﻿<manifest>
+ <provides class="eu.qualimaster.dynamicgraph.DynamicGraphCompilation">
+  <algorithm family="fDynamicGraphCompilation">
+  </algorithm>
+ </provides>
+</manifest>

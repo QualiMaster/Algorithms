@@ -1,0 +1,6 @@
+﻿<manifest>
+ <provides topology="eu.qualimaster.dynamicgraph.TopoDynamicHubComputation">
+  <algorithm family="fDynamicHubComputation">
+  </algorithm>
+ </provides>
+</manifest>

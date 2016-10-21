@@ -50,6 +50,12 @@
 	
 	<target name="maven"> 
 
+		<mavenAndDeploy pomFile="dynamic-graph-compilation/pom.xml" />
+		<mavenAndDeploy pomFile="dynamic-hub-computation/pom.xml" />
+		<mavenAndDeploy pomFile="dynamic-graph-sink/pom.xml" />
+		<mavenAndDeploy pomFile="focus-sink/pom.xml" />
+		<mavenAndDeploy pomFile="MI_data_sink/pom.xml" />
+
 		<maven pomFile="hy-correlation/pom.xml" />
 		<parentDeploy folder="hy-correlation" prefix="correlation" />
 		<moduleDeploy moduleFolder="hy-correlation-commons" prefix="correlation" baseFolder="hy-correlation" />
@@ -64,5 +70,6 @@
 
 		<mavenAndDeploy pomFile="focused-spring-client/pom.xml" />
 		<mavenAndDeploy pomFile="focused-spring-client-simulator/pom.xml" />
+
 	</target>
 </project>

@@ -1,0 +1,4 @@
+﻿<manifest>
+ <provides sink="eu.qualimaster.algorithms.imp.correlation.MIDataSinkForFinancial">
+ </provides>
+</manifest>
