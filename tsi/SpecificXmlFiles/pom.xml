@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.qualimaster</groupId>
+  <artifactId>SpecificXmlFiles</artifactId>
+  <version>0.5.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <build>
+    <plugins>
+         <plugin>
+             <artifactId>maven-install-plugin</artifactId>
+             <version>2.3.1</version>
+             <configuration>
+                 <createChecksum>true</createChecksum>
+             </configuration>
+         </plugin>
+		   <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>eu.qualimaster</groupId>
+                        <artifactId>AlgorithmAssemblies</artifactId>
+                        <version>0.5.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+		        <executions>
+		          <execution>
+                        <id>make-profilingAssembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>settingsSpec</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+		        </executions>
+            </plugin>
+    </plugins>
+	<resources>
+        <resource>
+            <directory>${basedir}</directory>
+            <filtering>false</filtering>
+                <includes>
+                    <include>src/main/java/**/*.*</include>
+                </includes>
+        </resource>
+    </resources>
+  </build>
+  
+  <repositories> 
+    <repository>
+       <id>qm.eu</id>
+       <name>qm.eu</name>
+       <url>https://projects.sse.uni-hildesheim.de/qm/maven/</url> 
+	   <releases>
+		<enabled>false</enabled>
+	  </releases>
+    </repository>        
+  </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+       <id>qm.eu</id>
+       <name>qm.eu</name>
+       <url>https://projects.sse.uni-hildesheim.de/qm/maven/</url> 
+        <releases><enabled>false</enabled></releases>
+	</pluginRepository>
+  </pluginRepositories>	
+</project>

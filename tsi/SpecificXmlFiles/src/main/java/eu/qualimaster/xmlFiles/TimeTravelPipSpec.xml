@@ -1,0 +1,59 @@
+<pipeline>
+	<name>TimeTravelPip</name>
+		<command>
+			<name>addMarketplayer</name>
+			<request>
+				<field sequence="0">addMarketplayer</field>
+				<field sequence="1">%listOfPairs%</field>
+			</request>
+			<response>
+				<field sequence="0">addMarketplayer_response</field>
+				<field sequence="1">%status%</field>
+				<field sequence="2">%result%</field>
+			</response>
+			<response>
+				<field sequence="0">resultsNodes_response</field>
+				<field sequence="1">%result%</field>
+			</response>
+		</command>
+		
+		<command>
+			<name>removeMarketplayer</name>
+			<request>
+				<field sequence="0">removeMarketplayer</field>
+				<field sequence="1">%listOfPairs%</field>
+			</request>
+			<response>
+				<field sequence="0">removeMarketplayer_response</field>
+				<field sequence="1">%status%</field>
+			</response>
+		</command>
+
+
+		<command>
+			<name>requestHistoricalDependency</name>
+			<request>
+				<field sequence="0">requestHistoricalDependency</field>
+				<field sequence="1">%RequestID%</field>
+				<field sequence="2">%StartDateTime%</field>
+				<field sequence="3">%EndDateTime%</field>
+				<field sequence="4">%Speed%</field>
+			</request>
+			<response>
+				<field sequence="0">requestHistoricalDependency_response</field>
+				<field sequence="1">%status%</field>
+			</response>
+		</command>
+		
+		<command>
+			<name>cancelHistoricalDependency</name>
+			<request>
+				<field sequence="0">cancelHistoricalDependency</field>
+				<field sequence="1">%RequestID%</field>
+			</request>
+			<response>
+				<field sequence="0">cancelHistoricalDependency_response</field>
+				<field sequence="1">%status%</field>
+			</response>
+		</command>
+</pipeline>
