@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="TSI_PriorityPipeline_sources" default="maven" basedir=".">
+<project name="tsi" default="maven" basedir=".">
 	<!-- import of the global Jenkins properties -->
 	<property file="${user.home}/global-build.properties"/>
 	<property file="${user.home}/qualimaster-build.properties"/>
@@ -49,25 +49,6 @@
 	</macrodef>
 	
 	<target name="maven"> 
-	    <!-- <mavenAndDeploy pomFile="preprocessor/pom.xml" />
-	    <mavenAndDeploy pomFile="priority-data-sink/pom.xml" />
-	    <mavenAndDeploy pomFile="spring-client/pom.xml" />
-	    <mavenAndDeploy pomFile="spring-client-simulator/pom.xml" />
-	    <mavenAndDeploy pomFile="topo-hardware-correlation-financial/pom.xml" />
-	    <mavenAndDeploy pomFile="topo-hardware-correlation-twitter/pom.xml" />
-	    <mavenAndDeploy pomFile="topo-software-correlation-financial/pom.xml" />
-	    <mavenAndDeploy pomFile="topo-software-correlation-twitter/pom.xml" /> -->
-		<mavenAndDeploy pomFile="dynamic-graph-compilation/pom.xml" />
-		<mavenAndDeploy pomFile="dynamic-hub-computation/pom.xml" />
-		<mavenAndDeploy pomFile="dynamic-graph-sink/pom.xml" />
-		<mavenAndDeploy pomFile="focus-sink/pom.xml" />
-		<mavenAndDeploy pomFile="MI_data_sink/pom.xml" />
-		<mavenAndDeploy pomFile="volatile-graphs/pom.xml" />
-		<mavenAndDeploy pomFile="time-graph/pom.xml" />
-		<mavenAndDeploy pomFile="time-travel-sink/pom.xml" />
-		<mavenAndDeploy pomFile="time-graph-spout/pom.xml" />
-		<mavenAndDeploy pomFile="transfer-entropy-external/pom.xml" />
-		<mavenAndDeploy pomFile="qm-transfer-entropy/pom.xml" />
 
 		<maven pomFile="hy-correlation/pom.xml" />
 		<parentDeploy folder="hy-correlation" prefix="correlation" />
@@ -80,11 +61,5 @@
 		<moduleDeploy moduleFolder="hy-priority-data-sink" prefix="correlation" baseFolder="hy-correlation" />
 		<moduleDeploy moduleFolder="spring-client" prefix="correlation" baseFolder="hy-correlation" />
 		<moduleDeploy moduleFolder="spring-client-simulator" prefix="correlation" baseFolder="hy-correlation" />
-
-		<mavenAndDeploy pomFile="focused-spring-client/pom.xml" />
-		<mavenAndDeploy pomFile="focused-spring-client-simulator/pom.xml" />
-		<mavenAndDeploy pomFile="hy-mapper/pom.xml" />
-		<mavenAndDeploy pomFile="hayashi-yoshida/pom.xml" />
-		<mavenAndDeploy pomFile="SpecificXmlFiles/pom.xml" />
 	</target>
 </project>
