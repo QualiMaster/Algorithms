@@ -1,0 +1,4 @@
+﻿<manifest>
+ <provides source="eu.qualimaster.focus.FocusedSpringClient">
+ </provides>
+</manifest>
