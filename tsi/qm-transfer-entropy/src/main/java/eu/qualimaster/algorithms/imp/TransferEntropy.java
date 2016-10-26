@@ -126,6 +126,7 @@ public class TransferEntropy implements IFTransferEntropy {
   @Override public void calculate(IIFTransferEntropySymbolListInput input,
     IIFTransferEntropyPairwiseFinancialOutput pairwiseFinancialResult) {
     //Do nothing
+    pairwiseFinancialResult.noOutput();
   }
 
   @Override public void setParameterWindowSize(int i) {
