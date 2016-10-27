@@ -169,22 +169,15 @@ public class TimeGraph implements IFTimeGraph {
       return;
     }
 
-    String[] fields = input.getQuery().split(",");
-    if (fields.length != 5) {
-      logger.error("Wrong path query received! Received: " + input + "\tReturning.");
-      pathStreamResult.noOutput();
-      return;
-    }
-
-    long start = Long.parseLong(fields[0]);
-    long end = Long.parseLong(fields[1]);
-    Vertex na = new Vertex(fields[2]);
-    Vertex nb = new Vertex(fields[3]);
+    long start = input.getStart();
+    long end = input.getEnd();
+    Vertex na = new Vertex(input.getVertexA());
+    Vertex nb = new Vertex(input.getVertexB());
     QueryType queryType = null;
     try {
-      queryType = QueryType.valueOf(fields[4]);
+      queryType = QueryType.valueOf(input.getType().toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.error("Wrong path query type received! type: " + fields[4] + "\tReturning.");
+      logger.error("Wrong path query type received! type: " + input.getType() + "\tReturning.");
       pathStreamResult.noOutput();
       return;
     }
