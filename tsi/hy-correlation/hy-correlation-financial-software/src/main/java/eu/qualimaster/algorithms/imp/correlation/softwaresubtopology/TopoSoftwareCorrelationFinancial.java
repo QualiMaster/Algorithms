@@ -3,6 +3,7 @@ package eu.qualimaster.algorithms.imp.correlation.softwaresubtopology;
 import eu.qualimaster.algorithms.imp.correlation.AbstractFinancialSubTopology;
 import eu.qualimaster.base.algorithm.ITopologyCreate;
 import eu.qualimaster.base.algorithm.SubTopologyOutput;
+import eu.qualimaster.infrastructure.PipelineOptions;
 
 import java.util.LinkedList;
 
@@ -41,22 +42,23 @@ public class TopoSoftwareCorrelationFinancial extends AbstractFinancialSubTopolo
   @Override
   public SubTopologyOutput createSubTopology(TopologyBuilder topologyBuilder, Config config,
                                              String prefix, String input, String streamId) {
-//    topologyBuilder
-//        .setSpout(activationHandlerExecutorName, new ResetWindowSpout(activationHandlerExecutorName,
-//                                                                      activationHandlerNamespace,
-//                                                                      true), 1);
+
     topologyBuilder.setBolt(prefix + "MapperBolt", new MapperBolt(mapperName, namespace, prefix), 1)
         .shuffleGrouping(input, streamId);
 
+    int parallelism_hint = PipelineOptions.getExecutorParallelism(config, hayashiYoshidaName, 13);
+
     topologyBuilder.setBolt(hayashiYoshidaName,
                             new HayashiYoshidaBolt(hayashiYoshidaName, namespace, true, streamId),
-                            13)
+                            parallelism_hint)
+        .setNumTasks(parallelism_hint)  // TODO: Should #tasks > #executors for scaling up? If yes,
+                                        // how do we decide the #tasks?
         .directGrouping(mapperName, "symbolsStream")
         .directGrouping(mapperName, "configurationStream")
         .allGrouping(mapperName, "resetWindowStream");
-//        .shuffleGrouping(prefix + "MapperBolt", "allSymbolsStringStream");
 
-    return new SubTopologyOutput(hayashiYoshidaName, streamId, 13, 13);
+    return new SubTopologyOutput(hayashiYoshidaName, streamId, parallelism_hint + 1,
+                                 parallelism_hint);  // TODO: How do we decide the numWorkers?
   }
 
   @Override
