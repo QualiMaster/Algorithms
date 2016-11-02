@@ -266,7 +266,9 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     for (String s : allSymbolsList) {
       idsToNamesMap.put(s, s);
     }
-    mappingChangedListener.notifyIdsNamesMapChanged();
+    if (mappingChangedListener != null) {
+      mappingChangedListener.notifyIdsNamesMapChanged();
+    }
   }
 
   public void disconnect() {
@@ -301,6 +303,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   @Override
   public void setDataSourceListener(IDataSourceListener iDataSourceListener) {
     mappingChangedListener = iDataSourceListener;
+    mappingChangedListener.notifyIdsNamesMapChanged();
   }
 
   private void monitorMe() {
