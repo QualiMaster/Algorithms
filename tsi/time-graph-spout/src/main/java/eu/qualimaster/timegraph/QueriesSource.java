@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
@@ -23,12 +24,18 @@ public class QueriesSource implements ITimeGraphQueriesSource {
   static final Logger logger = LoggerFactory.getLogger(QueriesSource.class);
   private long start;
   private long end;
-  private String pathQuery;
+  private String pathQueryType;
+  private String pathQueryVertexA;
+  private String pathQueryVertexB;
+  private DateFormat dateFormat;
 
   public QueriesSource() {
     this.start = -1;
     this.end = -1;
-    this.pathQuery = "";
+    pathQueryType = "";
+    pathQueryVertexA = "";
+    pathQueryVertexB = "";
+    dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH.mm.ss");
   }
 
   @Override
@@ -63,11 +70,20 @@ public class QueriesSource implements ITimeGraphQueriesSource {
 
   @Override
   public ITimeGraphQueriesSourcePathQueryStreamOutput getPathQueryStream() {
-    if (!pathQuery.equals("")) {
+    if (start != -1 && end != -1) {
+      logger.info("Sending path query");
       TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput
           o = new TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput();
-      o.setQuery(pathQuery);
-      pathQuery = "";
+      o.setStart(start);
+      o.setEnd(end);
+      o.setVertexA(pathQueryVertexA);
+      o.setVertexB(pathQueryVertexB);
+      o.setType(pathQueryType);
+      start = -1;
+      end = -1;
+      pathQueryVertexA = "";
+      pathQueryVertexB = "";
+      pathQueryType = "";
       return o;
     }
 
@@ -96,9 +112,14 @@ public class QueriesSource implements ITimeGraphQueriesSource {
       return;
     }
     // value = "start,end" format = (MM/dd/yyyy,HH.mm.ss,MM/dd/yyyy,HH.mm.ss)
-    DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH.mm.ss");
+    String[] params = value.split(",");
+    if (params.length != 4 && params.length != 2) {
+      logger.error("Malformed snapshot query received: " + value + ". Returning");
+      start = -1;
+      end = -1;
+      return;
+    }
     try {
-      String[] params = value.split(",");
       start = dateFormat.parse(params[0] + "," + params[1]).getTime();
       // TODO: Only "stubs" are currently supported
 //      end = dateFormat.parse(params[2] + "," + params[3]).getTime();
@@ -113,7 +134,30 @@ public class QueriesSource implements ITimeGraphQueriesSource {
   // TODO: Send a parameter change (-1,-1) to init this (the same values sent twice won't reach the spout)
   public void setParameterPathQuery(String value) {
     logger.info("Path query received: " + value);
-    pathQuery = value;
+
+    if (value.equals("")) {
+      start = -1;
+      end = -1;
+      return;
+    }
+
+    String[] params = value.split(",");
+    if (params.length != 7) {
+      logger.error("Malformed path query received: " + value + ". Returning");
+      start = -1;
+      end = -1;
+      return;
+    }
+    try {
+      start = dateFormat.parse(params[0] + "," + params[1]).getTime();
+      end = dateFormat.parse(params[2] + "," + params[3]).getTime();
+      pathQueryVertexA = params[4];
+      pathQueryVertexB = params[5];
+      pathQueryType = params[6];
+    } catch (ParseException e) {
+      logger.error(e.getMessage(), e);
+      throw new DefaultModeException(e.getMessage(), e);
+    }
   }
 
   @Override

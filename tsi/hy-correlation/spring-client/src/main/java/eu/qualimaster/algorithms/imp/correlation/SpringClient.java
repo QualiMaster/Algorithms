@@ -38,7 +38,7 @@ public class SpringClient implements ISpringFinancialData {
   long lastConfigurationEmittion;
   private boolean saveLocalData = false;
   private Map<String, String> idsToNamesMap;
-  private IDataSourceListener listener;
+  private IDataSourceListener mappingChangedListener;
 
   public SpringClient() {
     allSymbolsList = new ArrayList<>();
@@ -250,6 +250,9 @@ public class SpringClient implements ISpringFinancialData {
       allSymbolsList.add(key);
       idsToNamesMap.put(key, value);
     }
+    if (mappingChangedListener != null) {
+      mappingChangedListener.notifyIdsNamesMapChanged();
+    }
   }
 
   @Override
@@ -292,20 +295,18 @@ public class SpringClient implements ISpringFinancialData {
 
   @Override
   public Map<String, String> getIdsNamesMap() {
-    if(this.idsToNamesMap == null || this.idsToNamesMap.isEmpty()){
-      init("springClient");
-    }
     return this.idsToNamesMap;
   }
 
   @Override
   public void setDataSourceListener(IDataSourceListener listener) {
-    this.listener = listener;
+    this.mappingChangedListener = listener;
+    listener.notifyIdsNamesMapChanged();
   }
 
   // put this code every time the ids-names mapping is changed
-//  if (null != listener) {
-//	  listener.notifyIdsNamesMapChanged();
+//  if (null != mappingChangedListener) {
+//	  mappingChangedListener.notifyIdsNamesMapChanged();
 //	}
 
 }

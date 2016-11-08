@@ -4,7 +4,6 @@ import eu.qualimaster.families.inf.IFTimeGraph;
 import eu.qualimaster.observables.IObservable;
 import eu.qualimaster.pipeline.DefaultModeException;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +19,9 @@ import gr.tuc.softnet.ap0n.graph.Edge;
 import gr.tuc.softnet.ap0n.graph.Snapshot;
 import gr.tuc.softnet.ap0n.graph.Vertex;
 import gr.tuc.softnet.ap0n.index.VolatileIndex;
+import gr.tuc.softnet.ap0n.utils.DEntry;
+import gr.tuc.softnet.ap0n.utils.Interval;
+import gr.tuc.softnet.ap0n.utils.QueryType;
 
 /**
  * Created by ap0n on 22/7/2016.
@@ -27,11 +29,10 @@ import gr.tuc.softnet.ap0n.index.VolatileIndex;
 public class TimeGraph implements IFTimeGraph {
 
   final static Logger logger = LoggerFactory.getLogger(TimeGraph.class);
-  private VolatileIndex index;
-  private Set<String>
-      vertices;
-      // TODO: Remove me as soon as the index supports adding edges with new vertices
+  // TODO: Remove "previousValue" as soon as the index supports adding edges with new vertices
   String previousValue;
+  private VolatileIndex index;
+  private Set<String> vertices;
 
   public TimeGraph() {
     previousValue = "";
@@ -43,6 +44,9 @@ public class TimeGraph implements IFTimeGraph {
     }
   }
 
+  /*
+   * Graph Updates Execution
+   */
   @Override
   public void calculate(IIFTimeGraphEdgeStreamInput input,
                         IIFTimeGraphSnapshotStreamOutput snapshotStreamResult,
@@ -108,6 +112,9 @@ public class TimeGraph implements IFTimeGraph {
     }
   }
 
+  /*
+   * Snapshot Queries Execution
+   */
   @Override
   public void calculate(IIFTimeGraphSnapshotQueryStreamInput input,
                         IIFTimeGraphSnapshotStreamOutput snapshotStreamResult,
@@ -144,13 +151,57 @@ public class TimeGraph implements IFTimeGraph {
     snapshotStreamResult.setSnapshot(sb.toString());
   }
 
+  /*
+   * Path Queries Execution
+   */
   @Override
   public void calculate(IIFTimeGraphPathQueryStreamInput input,
                         IIFTimeGraphSnapshotStreamOutput snapshotStreamResult,
                         IIFTimeGraphPathStreamOutput pathStreamResult) {
+    // No snapshot result here
     snapshotStreamResult.noOutput();
-    pathStreamResult.noOutput();
-    // TODO: Implement me
+
+    // TODO: Break input to more fields as soon as Cui returns from holidays
+    //  input format start,end,idA,idB,type or "" for reset
+
+    if (input.equals("")) {
+      pathStreamResult.noOutput();
+      return;
+    }
+
+    long start = input.getStart();
+    long end = input.getEnd();
+    Vertex na = new Vertex(input.getVertexA());
+    Vertex nb = new Vertex(input.getVertexB());
+    QueryType queryType = null;
+    try {
+      queryType = QueryType.valueOf(input.getType().toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.error("Wrong path query type received! type: " + input.getType() + "\tReturning.");
+      pathStreamResult.noOutput();
+      return;
+    }
+
+    DEntry result = null;
+
+    try {
+      result = index.processPathQuery(new Interval(start, end), na, nb, queryType);
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      pathStreamResult.noOutput();
+      return;
+    }
+
+    if (result == null) {
+      pathStreamResult.setPath("No path");
+      return;
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(result.getPath().toString());
+    sb.append(",");
+    sb.append(result.getInterval().toString());
+    pathStreamResult.setPath(sb.toString());
   }
 
   @Override
