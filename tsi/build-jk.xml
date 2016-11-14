@@ -59,6 +59,7 @@
 		<mavenAndDeploy pomFile="time-travel-sink/pom.xml" />
 		<mavenAndDeploy pomFile="time-graph-spout/pom.xml" />
 		<mavenAndDeploy pomFile="qm-transfer-entropy/pom.xml" />
+		<mavenAndDeploy pomFile="transfer-sink/pom.xml" />
 
 		<maven pomFile="hy-correlation/pom.xml" />
 		<parentDeploy folder="hy-correlation" prefix="correlation" />
