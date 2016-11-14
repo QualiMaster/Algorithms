@@ -11,9 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Properties;
 
 /**
@@ -24,10 +22,11 @@ public class TransferSink implements ITransferSink, IDataSink {
   private static final String PROPERTIES_PATH = "/var/nfs/qm/tsi/external-service.properties";
   private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static int CORRELATION_RESULT_SERVER_PORT = 8888;
+  private static String REPLAY_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
+  private static int REPLAY_RESULT_SERVER_PORT = 8888;
   private Logger logger = LoggerFactory.getLogger(TransferSink.class);
-  private Socket socket;
-  private PrintWriter writer;
-  private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
+  private Socket socket, replaySocket;
+  private PrintWriter writer, replayWriter;
 
   private boolean terminating;
 
@@ -44,6 +43,8 @@ public class TransferSink implements ITransferSink, IDataSink {
       properties.load(inputStream);
       CORRELATION_RESULT_SERVER_IP = properties.getProperty("IP");
       CORRELATION_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("PORT"));
+      REPLAY_RESULT_SERVER_IP = properties.getProperty("REPLAY_IP");
+      REPLAY_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("REPLAY_PORT"));
     } catch (IOException ioex) {
       ioex.printStackTrace();
     } finally {
@@ -59,12 +60,14 @@ public class TransferSink implements ITransferSink, IDataSink {
   }
 
   @Override public void postDataPairwiseFinancial(ITransferSinkPairwiseFinancialInput data) {
-    if (terminating)
-      return;
-    emit(-1, data);
+    sendToServer(-1, data, false);
   }
 
   @Override public void emit(int ticket, ITransferSinkPairwiseFinancialInput data) {
+    sendToServer(ticket, data, true);
+  }
+
+  private void sendToServer(int ticket, ITransferSinkPairwiseFinancialInput data, boolean isReplay) {
     if (terminating)
       return;
     StringBuilder sb = new StringBuilder();
@@ -74,17 +77,31 @@ public class TransferSink implements ITransferSink, IDataSink {
     }
     sb.append(data.getId0()).append(",").append(data.getId1()).append(",").append(data.getDate()).append(",")
       .append(new DecimalFormat("0.######").format(data.getValue()));
-    sendStr(sb.toString());
+    sendStr(sb.toString(), isReplay);
   }
 
-  private void sendStr(String str) {
+  private void sendStr(String str, boolean isReplay) {
+    PrintWriter w = isReplay ? replayWriter : writer;
     try {
-      writer.println(str);
+      w.println(str);
+      if (w.checkError()) {
+        throw new Exception("Error");
+      }
     } catch (Exception e) {
+      String server = isReplay ? "replay" : "result";
+      logger.error("Error. Disconnected from " + server + " server. Reconnecting...");
       try {
-        logger.error("Error. Disconnected from results server. Reconnecting...");
-        connectToResultsServer();
-        writer.println(str);
+        if (isReplay) {
+          connectToReplayServer();
+          w = replayWriter;
+        } else {
+          connectToNormalServer();
+          w = writer;
+        }
+        w.println(str);
+        if (w.checkError()) {
+          throw new IOException("Error writing to socket.");
+        }
       } catch (IOException e1) {
         logger.error(e1.getMessage(), e1);
       }
@@ -92,8 +109,18 @@ public class TransferSink implements ITransferSink, IDataSink {
   }
 
   private void connectToResultsServer() throws IOException {
+    connectToNormalServer();
+    connectToReplayServer();
+  }
+
+  private void connectToReplayServer() throws IOException {
+    replaySocket = new Socket(REPLAY_RESULT_SERVER_IP, REPLAY_RESULT_SERVER_PORT);
+    replayWriter = new PrintWriter(replaySocket.getOutputStream(), true);
+  }
+
+  private void connectToNormalServer() throws IOException {
     socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
-    writer = new PrintWriter(socket.getOutputStream());
+    writer = new PrintWriter(socket.getOutputStream(), true);
   }
 
   @Override public void connect() {
@@ -110,8 +137,10 @@ public class TransferSink implements ITransferSink, IDataSink {
   @Override public void disconnect() {
     terminating = true;
     writer.close();
+    replayWriter.close();
     try {
       socket.close();
+      replaySocket.close();
     } catch (IOException e) {
     }
   }
