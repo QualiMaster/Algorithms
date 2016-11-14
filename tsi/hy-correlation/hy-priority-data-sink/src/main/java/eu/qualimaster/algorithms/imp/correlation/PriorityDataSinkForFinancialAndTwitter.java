@@ -115,11 +115,17 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   private void sendStr(String str) {
     try {
       writer.println(str);
+      if (writer.checkError()) {
+        throw new Exception("Error writing");
+      }
     } catch (Exception e) {
       try {
         logger.error("Error. Disconnected from results server. Reconnecting...");
         connectToResultsServer();
         writer.println(str);
+        if (writer.checkError()) {
+          throw new IOException("error writing");
+        }
       } catch (IOException e1) {
         logger.error(e1.getMessage(), e1);
       }
@@ -128,7 +134,7 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
 
   private void connectToResultsServer() throws IOException {
     socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
-    writer = new PrintWriter(socket.getOutputStream());
+    writer = new PrintWriter(socket.getOutputStream(), true);
   }
 
   @Override

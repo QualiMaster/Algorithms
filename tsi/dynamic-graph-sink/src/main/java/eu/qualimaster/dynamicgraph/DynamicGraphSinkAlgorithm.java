@@ -52,13 +52,17 @@ private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
 
     try {
       writer.println(sb.toString());
-      writer.flush();
+      if (writer.checkError()) {
+        throw new Exception("Error writing...");
+      }
     } catch (Exception e) {
       logger.error("Not connected to results server. Reconnecting...");
       try {
         connect();
         writer.println(sb.toString());
-        writer.flush();
+        if (writer.checkError()) {
+          throw new Exception("Error writing...");
+        }
       } catch (Exception ex) {
         logger.error("Can't connect to results server.");
         logger.error(ex.getMessage(), ex);
@@ -129,6 +133,6 @@ private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
 
   private void connectToResultsServer() throws IOException {
     socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
-    writer = new PrintWriter(socket.getOutputStream());
+    writer = new PrintWriter(socket.getOutputStream(), true);
   }
 }
