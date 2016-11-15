@@ -54,12 +54,18 @@ public class TimeTravelSink implements ITimeTravelSink {
     try {
       writer.println(sb.toString());
       writer.flush();
+      if (writer.checkError()) {
+        throw new Exception("Error writing to server.");
+      }
     } catch (Exception e) {
       logger.error("Not connected to results server. Reconnecting...");
       try {
         connect();
         writer.println(sb.toString());
         writer.flush();
+        if (writer.checkError()) {
+          throw new Exception("");
+        }
       } catch (Exception ex) {
         logger.error("Can't connect to results server.");
         logger.error(ex.getMessage(), ex);

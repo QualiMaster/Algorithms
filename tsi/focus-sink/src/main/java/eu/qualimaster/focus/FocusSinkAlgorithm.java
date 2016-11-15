@@ -91,13 +91,17 @@ public class FocusSinkAlgorithm implements IFocusSink {
   private void sendStr(String str) {
     try {
       writer.println(str);
-      writer.flush();
+      if (writer.checkError()) {
+        throw new Exception("Error writing...");
+      }
     } catch (Exception e) {
       logger.error("Not connected to results server. Reconnecting...");
       try {
         connect();
         writer.println(str);
-        writer.flush();
+        if (writer.checkError()) {
+          throw new Exception("Error writing...");
+        }
       } catch (Exception ex) {
         logger.error("Can't connect to results server.");
         logger.error(ex.getMessage(), ex);
@@ -161,6 +165,6 @@ public class FocusSinkAlgorithm implements IFocusSink {
     socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
     logger.info("Connected. IP: " + socket.getInetAddress().getHostAddress()
                 + " PORT:" + socket.getPort());
-    writer = new PrintWriter(socket.getOutputStream());
+    writer = new PrintWriter(socket.getOutputStream(), true);
   }
 }
