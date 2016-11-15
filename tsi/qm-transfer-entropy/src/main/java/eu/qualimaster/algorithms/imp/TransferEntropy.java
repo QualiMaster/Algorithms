@@ -2,7 +2,9 @@ package eu.qualimaster.algorithms.imp;
 
 import eu.qualimaster.families.inf.IFTransferEntropy;
 import eu.qualimaster.observables.IObservable;
-import gr.tuc.softnet.te.TEPair;
+import gr.tuc.softnet.te.streaming.TEPairStreaming;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -14,9 +16,11 @@ import java.util.HashSet;
  * Created by justme on 29/9/2016.
  */
 public class TransferEntropy implements IFTransferEntropy {
+
+  private Logger logger = LoggerFactory.getLogger(TransferEntropy.class);
   private HashSet<String> ids = new HashSet<>();
   private HashMap<String, Double> lastValues = new HashMap<>();
-  private HashMap<String, TEPair> allPairs = new HashMap<>();
+  private HashMap<String, TEPairStreaming> allPairs = new HashMap<>();
   private int bins;
   private int multiplier; // Multiply the first value we get by this in order to get the max value
   private int numberOfBW;
@@ -30,7 +34,7 @@ public class TransferEntropy implements IFTransferEntropy {
   }
 
   private void init() {
-    bins = 32;
+    bins = 30;
     multiplier = 2;
     ids = new HashSet<>();
     lastValues = new HashMap<>();
@@ -45,12 +49,12 @@ public class TransferEntropy implements IFTransferEntropy {
     long timestamp = input.getTimestamp();
     lastValues.put(id, value); // Overwrite if exists
     boolean contains = ids.contains(id);
-//    pairwiseFinancialResult.setValue(-1); // Just to know when the first output tuple is added
     boolean firstOutput = true;
+
     IIFTransferEntropyPairwiseFinancialOutput further;
 
-    // TODO remove this block. Just for testing. Ignore new ids if we already have 300
-    if(!contains && ids.size() >= 300) {
+    // TODO remove this block. Just for testing. Ignore new ids if we already have X
+    if (!contains && ids.size() >= 500) {
       pairwiseFinancialResult.noOutput();
       return;
     }
@@ -59,16 +63,17 @@ public class TransferEntropy implements IFTransferEntropy {
       if (id.equals(otherId)) {
         continue;
       }
-      TEPair pair;
+      TEPairStreaming pair;
       if (!contains) {
-        pair =
-          new TEPair(id, otherId, bins, value / multiplier, multiplier * value, lastValues.get(otherId) / multiplier,
-            multiplier * lastValues.get(otherId), numberOfBW, interval);
+        pair = new TEPairStreaming(id, otherId, bins, value / multiplier, multiplier * value,
+          lastValues.get(otherId) / multiplier, multiplier * lastValues.get(otherId));
         addToPairs(allPairs, id, otherId, pair);
       } else {
         pair = allPairs.get(getPairKey(id, otherId));
       }
-      if (pair.processNewValue(id, value, timestamp)) {
+      pair.processNewValue(id, value, timestamp);
+
+      if (pair.isWarmedUp()) {
         if (Math.abs(pair.getTEyx()) > 0) {
           if (firstOutput) {
             pairwiseFinancialResult.setId0(pair.getStreamY());
@@ -110,7 +115,8 @@ public class TransferEntropy implements IFTransferEntropy {
     }
   }
 
-  private static void addToPairs(HashMap<String, TEPair> allPairs, String id, String otherId, TEPair pair) {
+  private static void addToPairs(HashMap<String, TEPairStreaming> allPairs, String id, String otherId,
+    TEPairStreaming pair) {
     String pairKey = getPairKey(id, otherId);
     allPairs.put(pairKey, pair);
   }
@@ -131,21 +137,22 @@ public class TransferEntropy implements IFTransferEntropy {
 
   @Override public void setParameterWindowSize(int i) {
     numberOfBW = i / interval;
-    for(TEPair p : allPairs.values()) {
-      p.setNumberOfBasicWindows(numberOfBW);
-    }
+    //    for (TEPairStreaming p : allPairs.values()) {
+    //      p.setNumberOfBasicWindows(numberOfBW);
+    //    }
   }
 
   @Override public void setParameterWindowAdvance(int value) {
     interval = value;
-    for(TEPair p : allPairs.values()) {
-      p.setUpdate_TE_every(interval);
-    }
+    //    for (TEPairStreaming p : allPairs.values()) {
+    //      p.setUpdate_TE_every(interval);
+    //    }
   }
 
   @Override public void setParameterDensitySize(int i) {
-    init();
-    bins = i;
+    // TODO uncomment us. Disabled for now
+    //    init();
+    //    bins = i;
   }
 
   @Override public void switchState(State state) {
