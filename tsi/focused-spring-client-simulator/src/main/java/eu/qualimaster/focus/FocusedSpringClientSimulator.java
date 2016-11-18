@@ -13,6 +13,7 @@ import eu.qualimaster.observables.IObservable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,10 +26,12 @@ public class FocusedSpringClientSimulator implements ISimulatedFocusFinancialDat
   private SpringClientSimulator springClientSimulator;
   private Set<String> filter;
   private Logger logger = LoggerFactory.getLogger(FocusedSpringClientSimulator.class);
+  private long tupleCounter;
 
   public FocusedSpringClientSimulator() {
     this.springClientSimulator = new SpringClientSimulator();
     filter = new HashSet<>();
+    tupleCounter = 0;
   }
 
   @Override
@@ -56,14 +59,18 @@ public class FocusedSpringClientSimulator implements ISimulatedFocusFinancialDat
 
     ISimulatedFinancialData.ISimulatedFinancialDataSpringStreamOutput
         a = springClientSimulator.getSpringStream();
-
-    String id = a.getSymbolTuple().split(",")[0];
-
-    if (a != null && filter(id)) {
-      ISimulatedFocusFinancialDataSpringStreamOutput output =
-          new SimulatedFocusFinancialData.SimulatedFocusFinancialDataSpringStreamOutput();
-      output.setSymbolTuple(springClientSimulator.getSpringStream().getSymbolTuple());
-      return output;
+    if (a != null) {
+      String[] fields = a.getSymbolTuple().split(",");
+      String id = fields[0];
+      if (filter(id)) {
+        ISimulatedFocusFinancialDataSpringStreamOutput output =
+            new SimulatedFocusFinancialData.SimulatedFocusFinancialDataSpringStreamOutput();
+        output.setSymbolTuple(a.getSymbolTuple());
+        if (tupleCounter++ % 100 == 0) {
+          logger.info("Tuple date: " + fields[1] + "," + fields[2] + "\tReal date: " + new Date());
+        }
+        return output;
+      }
     }
     return null;
   }
