@@ -1,0 +1,20 @@
+<manifest>
+ <provides class="eu.qualimaster.algorithms.imp.correlation.Preprocessor">
+  <algorithm family="Preprocessor">
+      <description>The financial preprocessor</description>
+	  <input>
+          <tuple name="springStream">
+              <field name="symbolTuple" type="STRING"/>
+          </tuple>
+      </input>
+      <output>
+          <tuple name="preprocessedStream">
+              <field name="value" type="DOUBLE"/>
+              <field name="timestamp" type="LONG"/>
+              <field name="symbolId" type="STRING"/>
+              <field name="volume" type="INTEGER"/>
+          </tuple>
+      </output>
+  </algorithm>
+ </provides>
+</manifest>

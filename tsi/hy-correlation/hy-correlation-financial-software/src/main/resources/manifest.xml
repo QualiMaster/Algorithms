@@ -1,0 +1,68 @@
+<manifest>
+ <provides class="eu.qualimaster.algorithms.imp.correlation.softwaresubtopology.TopoSoftwareCorrelationFinancial">
+  <algorithm family="TopoSoftwareCorrelationFinancial">
+      <description>The financial software correlation topology</description>
+	  <input>
+	      <tuple name="preprocessedStream">
+              <field name="value" type="DOUBLE"/>
+              <field name="timestamp" type="LONG"/>
+              <field name="symbolId" type="STRING"/>
+              <field name="volume" type="INTEGER"/>
+          </tuple>
+          <tuple name="symbolList">
+              <field name="allSymbols" type="STRINGLIST"/>
+          </tuple>
+      </input>
+      <output>
+	      <tuple name="pairwiseFinancial">
+              <field name="id0" type="STRING"/>
+			  <field name="id1" type="STRING"/>
+			  <field name="date" type="STRING-TIMESTAMP"/>
+			  <field name="value" type="DOUBLE"/>
+          </tuple>
+      </output>
+	  <parameter name="windowSize" type="INTEGER" defaultValue="30"/>
+  </algorithm>
+ </provides>
+ <provides command="">
+  <algorithm family="CorrelationSW">
+      <description>The correlation SW</description>
+	  <input>
+	      <tuple name="preprocessedStream">
+              <field name="value" type="DOUBLE"/>
+              <field name="timestamp" type="LONG"/>
+              <field name="symbolId" type="STRING"/>
+              <field name="volume" type="INTEGER"/>
+          </tuple>
+          <tuple name="symbolList">
+              <field name="allSymbols" type="STRINGLIST"/>
+          </tuple>
+      </input>
+      <output>
+	      <tuple name="pairwiseFinancial">
+              <field name="id0" type="STRING"/>
+			  <field name="id1" type="STRING"/>
+			  <field name="date" type="STRING-TIMESTAMP"/>
+			  <field name="value" type="DOUBLE"/>
+          </tuple>
+      </output>
+	  <parameter name="windowSize" type="INTEGER" defaultValue="30"/>
+  </algorithm>
+ </provides>
+  <provides command="">
+  <algorithm family="RandomSubPipelineAlgorithm1">
+	  <input>
+          <tuple name="randomData">
+              <field name="randomInteger" type="INTEGER"/>
+			  <field name="timestamp" type="TIMESTAMP"/>
+          </tuple>
+      </input>
+      <output>
+          <tuple name="randomData">
+              <field name="randomInteger" type="INTEGER"/>
+			  <field name="timestamp" type="TIMESTAMP"/>
+          </tuple>
+      </output>
+  </algorithm>
+ </provides>
+</manifest>
