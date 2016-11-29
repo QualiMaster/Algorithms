@@ -1,0 +1,26 @@
+<manifest>
+ <provides class="eu.qualimaster.algorithms.imp.correlation.hardwaresubtopology.TopoHardwareCorrelationFinancial">
+  <algorithm family="TopoHardwareCorrelationFinancial">
+	  <input>
+	      <tuple name="preprocessedStream">
+              <field name="symbolId" type="STRING"/>
+			  <field name="timestamp" type="LONG"/>
+			  <field name="value" type="REAL"/>
+			  <field name="volume" type="INTEGER"/>
+          </tuple>
+		  <tuple name="symbolList">
+		      <field name="allSymbols" type="STRINGLIST"/>
+		  </tuple>
+      </input>
+      <output>
+          <tuple name="pairwiseFinancial">
+              <field name="id0" type="STRING"/>
+			  <field name="id1" type="STRING"/>
+			  <field name="date" type="STRING-TIMESTAMP"/>
+			  <field name="value" type="DOUBLE"/>
+          </tuple>
+      </output>
+	  <parameter name="windowSize" type="INTEGER" defaultValue="30"/>
+  </algorithm>
+ </provides>
+</manifest>
