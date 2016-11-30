@@ -36,6 +36,7 @@ public class Mapper implements IFMapper
     private Map<String, Set<Integer>> streamTaskMapping = new HashMap<String, Set<Integer>>();
     private Map<Integer, List<Pair<String, String>>> taskStreamPairsMapping = new HashMap<Integer, List<Pair<String, String>>>();
     private List<Integer> taskIds;
+    private thisTaskId;
     private Logger logger = LoggerFactory.getLogger(Mapper.class);
     String symbolId;
     long timestamp;
@@ -46,6 +47,11 @@ public class Mapper implements IFMapper
     private long windowAdvance = 0;
     private long lastSeenTimestamp = 0;
     private List<String> allSymbols;
+    
+    public Mapper(List<Integer> taskIds, int thisTaskId) {
+    	this.thisTaskId = thisTaskId;
+    	Mapper(taskIds);
+    }
     
     public Mapper(List<Integer> taskIds) {
         hasInitialized = false;
