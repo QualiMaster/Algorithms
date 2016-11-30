@@ -22,7 +22,7 @@ public class TransferEntropy implements IFTransferEntropy {
   private HashMap<String, Double> lastValues = new HashMap<>();
   private HashMap<String, TEPairStreaming> allPairs = new HashMap<>();
   private int bins;
-  private int multiplier; // Multiply the first value we get by this in order to get the max value
+  private double multiplier; // Multiply the first value we get by this in order to get the max value
   private int numberOfBW;
   private int interval; // Interval (in sec) between TE calcs
   private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
@@ -35,7 +35,7 @@ public class TransferEntropy implements IFTransferEntropy {
 
   private void init() {
     bins = 30;
-    multiplier = 2;
+    multiplier = 1.2;
     ids = new HashSet<>();
     lastValues = new HashMap<>();
     allPairs = new HashMap<>();
