@@ -22,7 +22,7 @@ public class TransferEntropy implements IFTransferEntropy {
   private HashMap<String, Double> lastValues = new HashMap<>();
   private HashMap<String, TEPairStreaming> allPairs = new HashMap<>();
   private int bins;
-  private int multiplier; // Multiply the first value we get by this in order to get the max value
+  private double multiplier; // Multiply the first value we get by this in order to get the max value
   private int numberOfBW;
   private int interval; // Interval (in sec) between TE calcs
   private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
@@ -35,7 +35,7 @@ public class TransferEntropy implements IFTransferEntropy {
 
   private void init() {
     bins = 30;
-    multiplier = 2;
+    multiplier = 1.2;
     ids = new HashSet<>();
     lastValues = new HashMap<>();
     allPairs = new HashMap<>();
@@ -74,37 +74,7 @@ public class TransferEntropy implements IFTransferEntropy {
       pair.processNewValue(id, value, timestamp);
 
       if (pair.isWarmedUp()) {
-        if (Math.abs(pair.getTEyx()) > 0) {
-          if (firstOutput) {
-            pairwiseFinancialResult.setId0(pair.getStreamY());
-            pairwiseFinancialResult.setId1(pair.getStreamX());
-            pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-            pairwiseFinancialResult.setValue(pair.getTEyx());
-            firstOutput = false;
-          } else {
-            further = pairwiseFinancialResult.addFurther();
-            further.setId0(pair.getStreamY());
-            further.setId1(pair.getStreamX());
-            further.setDate(dateFormat.format(new Date()));
-            further.setValue(pair.getTEyx());
-          }
-        }
-
-        if (Math.abs(pair.getTExy()) > 0) {
-          if (firstOutput) {
-            pairwiseFinancialResult.setId0(pair.getStreamX());
-            pairwiseFinancialResult.setId1(pair.getStreamY());
-            pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-            pairwiseFinancialResult.setValue(pair.getTExy());
-            firstOutput = false;
-          } else {
-            further = pairwiseFinancialResult.addFurther();
-            further.setId0(pair.getStreamX());
-            further.setId1(pair.getStreamY());
-            further.setDate(dateFormat.format(new Date()));
-            further.setValue(pair.getTExy());
-          }
-        }
+        firstOutput = appendToOutputAndUpdateFlag(pairwiseFinancialResult, firstOutput, pair);
       }
     }
     if (!contains) {
@@ -113,6 +83,43 @@ public class TransferEntropy implements IFTransferEntropy {
     if (firstOutput) {
       pairwiseFinancialResult.noOutput();
     }
+  }
+
+  private boolean appendToOutputAndUpdateFlag(IIFTransferEntropyPairwiseFinancialOutput pairwiseFinancialResult,
+    boolean firstOutput, TEPairStreaming pair) {
+    IIFTransferEntropyPairwiseFinancialOutput further;
+    if (Math.abs(pair.getTEyx()) > 0) {
+      if (firstOutput) {
+        pairwiseFinancialResult.setId0(pair.getStreamY());
+        pairwiseFinancialResult.setId1(pair.getStreamX());
+        pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
+        pairwiseFinancialResult.setValue(pair.getTEyx());
+        firstOutput = false;
+      } else {
+        further = pairwiseFinancialResult.addFurther();
+        further.setId0(pair.getStreamY());
+        further.setId1(pair.getStreamX());
+        further.setDate(dateFormat.format(new Date()));
+        further.setValue(pair.getTEyx());
+      }
+    }
+
+    if (Math.abs(pair.getTExy()) > 0) {
+      if (firstOutput) {
+        pairwiseFinancialResult.setId0(pair.getStreamX());
+        pairwiseFinancialResult.setId1(pair.getStreamY());
+        pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
+        pairwiseFinancialResult.setValue(pair.getTExy());
+        firstOutput = false;
+      } else {
+        further = pairwiseFinancialResult.addFurther();
+        further.setId0(pair.getStreamX());
+        further.setId1(pair.getStreamY());
+        further.setDate(dateFormat.format(new Date()));
+        further.setValue(pair.getTExy());
+      }
+    }
+    return firstOutput;
   }
 
   private static void addToPairs(HashMap<String, TEPairStreaming> allPairs, String id, String otherId,
