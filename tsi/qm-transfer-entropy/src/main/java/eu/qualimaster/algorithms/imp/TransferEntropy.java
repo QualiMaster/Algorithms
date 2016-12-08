@@ -18,14 +18,16 @@ import java.util.HashSet;
 public class TransferEntropy implements IFTransferEntropy {
 
   private Logger logger = LoggerFactory.getLogger(TransferEntropy.class);
-  private HashSet<String> ids = new HashSet<>();
-  private HashMap<String, Double> lastValues = new HashMap<>();
-  private HashMap<String, TEPairStreaming> allPairs = new HashMap<>();
+  private HashSet<String> ids;
+  private HashMap<String, Double> lastValues;
+  private HashMap<String, TEPairStreaming> allPairs;
+  private HashMap<String, Double> lastEmitted;
   private int bins;
   private double multiplier; // Multiply the first value we get by this in order to get the max value
   private int numberOfBW;
   private int interval; // Interval (in sec) between TE calcs
   private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
+  private static final double RESULT_CHANGED_PERCENTAGE = 0.01;
 
   public TransferEntropy() {
     interval = 10;
@@ -39,6 +41,7 @@ public class TransferEntropy implements IFTransferEntropy {
     ids = new HashSet<>();
     lastValues = new HashMap<>();
     allPairs = new HashMap<>();
+    lastEmitted = new HashMap<>();
   }
 
   @Override public void calculate(IIFTransferEntropyPreprocessedStreamInput input,
@@ -88,7 +91,12 @@ public class TransferEntropy implements IFTransferEntropy {
   private boolean appendToOutputAndUpdateFlag(IIFTransferEntropyPairwiseFinancialOutput pairwiseFinancialResult,
     boolean firstOutput, TEPairStreaming pair) {
     IIFTransferEntropyPairwiseFinancialOutput further;
-    if (Math.abs(pair.getTEyx()) > 0) {
+    String pairDirectedKey = pair.getStreamY() + "," + pair.getStreamX();
+    double lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.000000001;
+    // Default value different than 0 so we can divide
+
+    if (Math.abs(pair.getTEyx() - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
+      lastEmitted.put(pairDirectedKey, pair.getTEyx());
       if (firstOutput) {
         pairwiseFinancialResult.setId0(pair.getStreamY());
         pairwiseFinancialResult.setId1(pair.getStreamX());
@@ -104,7 +112,10 @@ public class TransferEntropy implements IFTransferEntropy {
       }
     }
 
-    if (Math.abs(pair.getTExy()) > 0) {
+    pairDirectedKey = pair.getStreamX() + "," + pair.getStreamY();
+    lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.000000001;
+    if (Math.abs(pair.getTExy() - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
+      lastEmitted.put(pairDirectedKey, pair.getTExy());
       if (firstOutput) {
         pairwiseFinancialResult.setId0(pair.getStreamX());
         pairwiseFinancialResult.setId1(pair.getStreamY());
