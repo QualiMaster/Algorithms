@@ -3,6 +3,9 @@ package eu.qualimaster.timegraph;
 import eu.qualimaster.families.inf.IFTimeGraphMapper;
 import eu.qualimaster.observables.IObservable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,11 +24,11 @@ import static utils.HashFunctions.hv;
  * Created by ap0n on 25/11/2016.
  */
 public class TimeGraphMapper implements IFTimeGraphMapper {
+  private Logger logger = LoggerFactory.getLogger(TimeGraphMapper.class);
+  private List<Integer> timeGraphTaskIds;
+  private Set<String> indexedVertexIds;
 
-  List<Integer> timeGraphTaskIds;
-  Set<String> indexedVertexIds;
-
-  public TimeGraphMapper(List<Integer> timeGraphTaskIds) {
+  public TimeGraphMapper(List<Integer> timeGraphTaskIds, Integer myId) {
     this.timeGraphTaskIds = timeGraphTaskIds;
     this.indexedVertexIds = new HashSet<>();
   }
@@ -61,21 +64,29 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
 
     if (Integer.parseInt(fields[4]) == 0) {
       // Deletion
-      emitDirect(new Edge(fields[0], fields[1], time), false, dataStreamResult);
+      Edge toDelete = new Edge(fields[0], fields[1], time);
+      logger.info("Deleting edge: " + toDelete.toString());
+      emitDirect(toDelete, false, dataStreamResult);
     } else {
       // Addition
       if (!indexedVertexIds.contains(fields[0])) {
         // Add v0
-        emitDirect(new Vertex(fields[0], time), true, dataStreamResult);
+        Vertex toAdd = new Vertex(fields[0], time);
+        logger.info("Adding vertex: " + toAdd.toString());
+        emitDirect(toAdd, true, dataStreamResult);
         indexedVertexIds.add(fields[0]);
       }
       if (!indexedVertexIds.contains(fields[1])) {
         // Add v1
-        emitDirect(new Vertex(fields[1], time), true, dataStreamResult);
+        Vertex toAdd = new Vertex(fields[1], time);
+        logger.info("Adding vertex: " + toAdd.toString());
+        emitDirect(toAdd, true, dataStreamResult);
         indexedVertexIds.add(fields[1]);
       }
       // Add edge
-      emitDirect(new Edge(fields[0], fields[1], time), true, dataStreamResult);
+      Edge toAdd = new Edge(fields[0], fields[1], time);
+      logger.info("Adding edge: " + toAdd.toString());
+      emitDirect(toAdd, true, dataStreamResult);
     }
   }
 
