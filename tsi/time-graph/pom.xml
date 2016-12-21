@@ -19,14 +19,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- add if infrastructure dependencies(storm, hdfs and hbase) are involved -->
-            <dependency>
-                <groupId>eu.qualimaster</groupId>
-                <artifactId>InfrastructureDependencies</artifactId>
-                <version>0.5.0-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <!-- add if pipeline dependencies(StormCommons and QualiMaster.Events) are involved -->
             <dependency>
                 <groupId>eu.qualimaster</groupId>
@@ -39,11 +31,8 @@
     </dependencyManagement>
 
     <build>
-
         <sourceDirectory>src/main/java</sourceDirectory>
-
         <plugins>
-
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.3.1</version>
@@ -181,11 +170,6 @@
             <version>0.5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>eu.qualimaster</groupId>
-            <artifactId>DataManagementLayer</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>gr.tuc.softnet.ap0n</groupId>
             <artifactId>volatilegraphs</artifactId>
             <version>0.1-SNAPSHOT</version>
@@ -194,10 +178,6 @@
             <groupId>montage-distributed</groupId>
             <artifactId>montage.distributed</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.esotericsoftware.kryo</groupId>
-            <artifactId>kryo</artifactId>
         </dependency>
     </dependencies>
 
