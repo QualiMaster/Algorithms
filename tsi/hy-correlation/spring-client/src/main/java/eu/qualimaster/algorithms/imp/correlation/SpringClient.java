@@ -12,7 +12,6 @@ import eu.qualimaster.dataManagement.sources.SpringHistoricalDataProvider;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
 import eu.qualimaster.pipeline.DefaultModeException;
-
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -46,8 +45,7 @@ public class SpringClient implements ISpringFinancialData {
     lastConfigurationEmittion = 0;
   }
 
-  @Override
-  public ISpringFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
+  @Override public ISpringFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
     connector.execute();
     String tmpData = connector.getData();
     if (tmpData != null && !tmpData.equals("")) {
@@ -76,15 +74,14 @@ public class SpringClient implements ISpringFinancialData {
       }
 
       SpringFinancialData.SpringFinancialDataSpringStreamOutput symbolTuple =
-          new SpringFinancialData.SpringFinancialDataSpringStreamOutput();
+        new SpringFinancialData.SpringFinancialDataSpringStreamOutput();
       symbolTuple.setSymbolTuple(tmpData);
       return symbolTuple;
     }
     return null;
   }
 
-  @Override
-  public String getAggregationKey(ISpringFinancialDataSpringStreamOutput tuple) {
+  @Override public String getAggregationKey(ISpringFinancialDataSpringStreamOutput tuple) {
     String result;
     String data = tuple.getSymbolTuple();
     int pos = data.indexOf(",");
@@ -96,54 +93,58 @@ public class SpringClient implements ISpringFinancialData {
     return result;
   }
 
-  @Override
-  public ISpringFinancialDataSymbolListOutput getSymbolList() {
+  @Override public ISpringFinancialDataSymbolListOutput getSymbolList() {
     long now = System.currentTimeMillis();
 
-    if (now - lastConfigurationEmittion >= 10000
-        || lastConfigurationEmittion == 0) {  // resend every 10 secs
+    if (now - lastConfigurationEmittion >= 10000 || lastConfigurationEmittion == 0) {  // resend every 10 secs
       lastConfigurationEmittion = now;
       SpringFinancialData.SpringFinancialDataSymbolListOutput allSymbols =
-          new SpringFinancialData.SpringFinancialDataSymbolListOutput();
+        new SpringFinancialData.SpringFinancialDataSymbolListOutput();
       allSymbols.setAllSymbols(allSymbolsList);
       return allSymbols;
     }
     return null;
   }
 
-  @Override
-  public String getAggregationKey(ISpringFinancialDataSymbolListOutput tuple) {
+  @Override public String getAggregationKey(ISpringFinancialDataSymbolListOutput tuple) {
     return null;
   }
 
   private void loginAction(String user) throws Exception {
-    PasswordStore.PasswordEntry entry = PasswordStore.getEntry(user);
-    String username = entry.getUserName();
-    String password = entry.getPassword();
-    //username = "hanover1";
-    //password = "mose2367";
     connector = new DataConnector();
 
-    int result = connector.connect();
-    while (result != DataConnector.OK) {
-      switch (result) {
-        case DataConnector.CONNECTION_ERROR:
-          logger.error("SERVER: Connection Error");
-//          throw new Exception("SERVER: Connection Error");
-        case DataConnector.NO_INTERNET:
-          logger.error("SERVER: Connection Error, Check your internet connection");
-//          throw new Exception("SERVER: Connection Error, Check your internet connection");
-      }
-      Thread.sleep(10000);
-      result = connector.connect();
-    }
-    logger.info("SERVER: Connection success");
-    try {
-      connector.login(username, password);
+    int i = 0;
+    String userAccount;
+    while (connector.getLoginStatus() == DataConnector.ACCOUNT_IN_USE) {
+      userAccount = "tsi" + ++i;
+      logger.info("Choosing account " + userAccount);
+      PasswordStore.PasswordEntry entry = PasswordStore.getEntry(userAccount);
+      String username = entry.getUserName();
+      String password = entry.getPassword();
 
-    } catch (IOException ex) {
-      logger.error("SERVER: Login Error : " + ex.getMessage());
-      throw new Exception("SERVER: Login Error : " + ex.getMessage());
+      int result = connector.connect();
+      while (result != DataConnector.OK) {
+        switch (result) {
+          case DataConnector.CONNECTION_ERROR:
+            logger.error("SERVER: Connection Error");
+            //          throw new Exception("SERVER: Connection Error");
+          case DataConnector.NO_INTERNET:
+            logger.error("SERVER: Connection Error, Check your internet connection");
+            //          throw new Exception("SERVER: Connection Error, Check your internet connection");
+        }
+        Thread.sleep(10000);
+        result = connector.connect();
+      }
+      logger.info("SERVER: Connection success");
+      try {
+        connector.login(username, password);
+        while (connector.getLoginStatus() == DataConnector.WAITING_FOR_LOGIN_RESPONSE) {
+          connector.execute();
+        }
+      } catch (IOException ex) {
+        logger.error("SERVER: Login Error : " + ex.getMessage());
+        throw new Exception("SERVER: Login Error : " + ex.getMessage());
+      }
     }
   }
 
@@ -164,8 +165,9 @@ public class SpringClient implements ISpringFinancialData {
         connector.startQuote(idsToNamesMap.get(marketPlayerId));
         Thread.sleep(1);
       } catch (Exception ex) {
-        throw new Exception("SERVER: Start Quote [" + marketPlayerId + "] = "
-                            + idsToNamesMap.get(marketPlayerId) + " Error, " + ex.getMessage());
+        throw new Exception(
+          "SERVER: Start Quote [" + marketPlayerId + "] = " + idsToNamesMap.get(marketPlayerId) + " Error, "
+            + ex.getMessage());
       }
       connector.sending = false;
     }
@@ -178,8 +180,9 @@ public class SpringClient implements ISpringFinancialData {
         connector.stopQuote(idsToNamesMap.get(marketPlayerId));
         Thread.sleep(1);
       } catch (Exception ex) {
-        throw new Exception("SERVER: Stop Quote [" + marketPlayerId + "] = "
-                            + idsToNamesMap.get(marketPlayerId) + " Error, " + ex.getMessage());
+        throw new Exception(
+          "SERVER: Stop Quote [" + marketPlayerId + "] = " + idsToNamesMap.get(marketPlayerId) + " Error, "
+            + ex.getMessage());
       }
       connector.sending = false;
     }
@@ -255,8 +258,7 @@ public class SpringClient implements ISpringFinancialData {
     }
   }
 
-  @Override
-  public void connect() {
+  @Override public void connect() {
     init("springClient");
 
     try {
@@ -269,44 +271,37 @@ public class SpringClient implements ISpringFinancialData {
     }
   }
 
-  @Override
-  public void disconnect() {
+  @Override public void disconnect() {
     // TODO(npavlakis): Disconnect here
   }
 
-  @Override
-  public IStorageStrategyDescriptor getStrategy() {
+  @Override public IStorageStrategyDescriptor getStrategy() {
     return null;
   }
 
-  @Override
-  public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
+  @Override public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
   }
 
-  @Override
-  public Double getMeasurement(IObservable iObservable) {
+  @Override public Double getMeasurement(IObservable iObservable) {
     return null;
   }
 
-  @Override
-  public IHistoricalDataProvider getHistoricalDataProvider() {
+  @Override public IHistoricalDataProvider getHistoricalDataProvider() {
     return new SpringHistoricalDataProvider();
   }
 
-  @Override
-  public Map<String, String> getIdsNamesMap() {
+  @Override public Map<String, String> getIdsNamesMap() {
     return this.idsToNamesMap;
   }
 
-  @Override
-  public void setDataSourceListener(IDataSourceListener listener) {
+  @Override public void setDataSourceListener(IDataSourceListener listener) {
     this.mappingChangedListener = listener;
     listener.notifyIdsNamesMapChanged();
   }
 
   // put this code every time the ids-names mapping is changed
-//  if (null != mappingChangedListener) {
-//	  mappingChangedListener.notifyIdsNamesMapChanged();
-//	}
+  //  if (null != mappingChangedListener) {
+  //	  mappingChangedListener.notifyIdsNamesMapChanged();
+  //	}
 
 }

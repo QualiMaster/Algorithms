@@ -35,8 +35,18 @@ public class DataConnector {
   public String fullQuoteListResponce;
   public int soTimeout;
 
+  private int loginStatus;
+  public static final int LOGIN_SUCESS = 0;
+  public static final int WAITING_FOR_LOGIN_RESPONSE = 1;
+  public static final int ACCOUNT_IN_USE = 2;
+
+  public int getLoginStatus() {
+    return loginStatus;
+  }
+
   public DataConnector() {
     soTimeout = 10 * 60 * 1000; // 10 min
+    loginStatus = ACCOUNT_IN_USE; // default value so we start checking accounts
 //    soTimeout = 5000;
   }
 
@@ -110,6 +120,7 @@ public class DataConnector {
    */
   public void login(String username, String pw) throws IOException {
     sendData(username + ",login," + pw + "!");
+    loginStatus = WAITING_FOR_LOGIN_RESPONSE;
     this.userName = username;
   }
 
@@ -245,6 +256,11 @@ public class DataConnector {
     if (response.toUpperCase().startsWith("LOGIN,")) {
       loggedIn = true;
       System.out.println(response.toString());
+      if(response.toLowerCase().contains("already logged in")) {
+        loginStatus = ACCOUNT_IN_USE;
+      } else {
+        loginStatus = LOGIN_SUCESS;
+      }
     } else if (response.toUpperCase().startsWith("ORDERQUOTE,")) {
       System.out.println(response.toString());
     } else if (response.toUpperCase().startsWith("QUOTELIST,")) {
