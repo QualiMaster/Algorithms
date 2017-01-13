@@ -40,11 +40,10 @@ public class QueriesSource implements ITimeGraphQueriesSource {
 
   @Override
   public ITimeGraphQueriesSourceSnapshotQueryStreamOutput getSnapshotQueryStream() {
-    if (start != -1 && end != -1) {
+    if (start != -1 && end != -1 && pathQueryType.equals("")) {
       logger.info("Sending snapshots query");
       TimeGraphQueriesSource.TimeGraphQueriesSourceSnapshotQueryStreamOutput
-          o =
-          new TimeGraphQueriesSource.TimeGraphQueriesSourceSnapshotQueryStreamOutput();
+          o = new TimeGraphQueriesSource.TimeGraphQueriesSourceSnapshotQueryStreamOutput();
       o.setStart(start);
       o.setEnd(end);
       start = -1;
@@ -70,7 +69,7 @@ public class QueriesSource implements ITimeGraphQueriesSource {
 
   @Override
   public ITimeGraphQueriesSourcePathQueryStreamOutput getPathQueryStream() {
-    if (start != -1 && end != -1) {
+    if (start != -1 && end != -1 && !pathQueryType.equals("")) {
       logger.info("Sending path query");
       TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput
           o = new TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput();
