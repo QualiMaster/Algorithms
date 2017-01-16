@@ -28,7 +28,7 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
   private List<Integer> timeGraphTaskIds;
   private Set<String> indexedVertexIds;
 
-  public TimeGraphMapper(List<Integer> timeGraphTaskIds, Integer myId) {
+  public TimeGraphMapper(List<Integer> timeGraphTaskIds, int myId) {
     this.timeGraphTaskIds = timeGraphTaskIds;
     this.indexedVertexIds = new HashSet<>();
   }
@@ -52,6 +52,15 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
     // fields[4]: 1 (addition) / 0 (deletion)
 
     String edge = input.getEdge();
+
+    if (edge == null) {
+      logger.warn("Null input.edge");
+      dataStreamResult.noOutput();
+      return;
+    } else {
+      logger.info("Not null input.edge");
+    }
+
     String[] fields = edge.split(",");
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
     Date date = null;
