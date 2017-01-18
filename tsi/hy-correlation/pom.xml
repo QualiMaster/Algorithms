@@ -112,18 +112,18 @@
                         </configuration>
                     </execution>
                     <!-- If this causes problems, please read first the related package readme on github and look into hy-commons how to disable in case of no profiling -->
-                    <!--<execution>-->
-                        <!--<id>make-profilingAssembly</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<descriptorRefs>-->
-                                <!--<descriptorRef>profiling</descriptorRef>-->
-                            <!--</descriptorRefs>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+                    <execution>
+                        <id>make-profilingAssembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>profiling</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
