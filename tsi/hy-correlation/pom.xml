@@ -112,7 +112,7 @@
                         </configuration>
                     </execution>
                     <!-- If this causes problems, please read first the related package readme on github and look into hy-commons how to disable in case of no profiling -->
-                    <execution>
+                    <!--  execution>
                         <id>make-profilingAssembly</id>
                         <phase>package</phase>
                         <goals>
@@ -123,7 +123,7 @@
                                 <descriptorRef>profiling</descriptorRef>
                             </descriptorRefs>
                         </configuration>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
             <plugin>
