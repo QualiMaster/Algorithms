@@ -11,7 +11,54 @@
 
     <artifactId>hy-correlation-financial-software</artifactId>
     <version>3.2-SNAPSHOT</version>
-
+    
+    <build>
+        <plugins>
+        <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>eu.qualimaster</groupId>
+                        <artifactId>AlgorithmAssemblies</artifactId>
+                        <version>0.5.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                    <!-- If this causes problems, please read first the related package readme on github and look into hy-commons how to disable in case of no profiling -->
+                    <execution>
+                        <id>make-profilingAssembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>profiling</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
