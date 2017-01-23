@@ -2,6 +2,7 @@ package eu.qualimaster.algorithms.imp.correlation;
 
 import eu.qualimaster.data.imp.SimulatedFinancialData;
 import eu.qualimaster.data.inf.ISimulatedFinancialData;
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.sources.IDataSourceListener;
 import eu.qualimaster.dataManagement.sources.IHistoricalDataProvider;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
@@ -19,7 +20,6 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +34,14 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
 
   Logger logger = Logger.getLogger(SpringClientSimulator.class);
 
-  private static boolean hdfsFile = true;
-  private String pathToSymbolList = "data/Symbollist.txt";
-  private String pathToData = "data/data.txt";
+  private boolean useHdfs = true;
+  private String hdfsUrl = "";
+  private String pathToSymbolList, pathToData;
   private File fileForList, fileForData;
+
   // For HDFS
-  Configuration c;
+  Configuration hdfsConfig;
   FileSystem fs;
-  private Path hdfsPathToSymbolList = new Path("/user/storm/Symbollist.txt");
-  private Path hdfsPathToData = new Path("/user/storm/data.txt");
   // /For HDFS
 
   private BufferedReader brForList, brForData;
@@ -70,6 +69,11 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   private int measurementDuration;  // seconds
   // ---------------------
 
+  static {
+//    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+    DataManagementConfiguration.configure(new File("/home/ap0n/Desktop/a.cfg"));
+  }
+
   public SpringClientSimulator() {
     financialMonitoringTimestamp = 0L;
     finacialThroughput = 0L;
@@ -79,6 +83,27 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     lastConfigurationEmittion = 0;
     idsToNamesMap = new HashMap<>();
     startSleeping = 0;
+
+    String symbolListFileName = "Symbollist.txt";
+    String dataFilename = "data.txt";
+    useHdfs = DataManagementConfiguration.useSimulationHdfs();
+
+    String pathPrefix = "";
+
+    if (useHdfs) {
+      hdfsUrl = DataManagementConfiguration.getHdfsUrl();
+      if (hdfsUrl.equals("")) {
+        hdfsUrl = "hdfs://snf-618466.vm.okeanos.grnet.gr:8020";
+      }
+      pathPrefix = DataManagementConfiguration.getHdfsPath();
+      if (pathPrefix.equals("")) {
+        pathPrefix = "/user/storm/";
+      }
+    } else {
+      pathPrefix = DataManagementConfiguration.getSimulationLocalPath();
+    }
+    pathToSymbolList = pathPrefix + "/" + symbolListFileName;
+    pathToData = pathPrefix + "/" + dataFilename;
   }
 
   private String newlineWithDateToNow(String line) {
@@ -193,13 +218,14 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
 
     allSymbolsList = new ArrayList<>();
     // Load allSymbols file
-    if (hdfsFile) {
-      c = new Configuration();
-      c.set("fs.defaultFS", "hdfs://snf-618466.vm.okeanos.grnet.gr:8020");
-      c.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-      c.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+    if (useHdfs) {
+      hdfsConfig = new Configuration();
+      hdfsConfig.set("fs.defaultFS", hdfsUrl);
+      hdfsConfig.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+      hdfsConfig.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
       try {
-        fs = FileSystem.get(c);
+        fs = FileSystem.get(hdfsConfig);
+        Path hdfsPathToSymbolList = new Path(pathToSymbolList);
         brForList = new BufferedReader(new InputStreamReader(fs.open(hdfsPathToSymbolList)));
       } catch (IOException e) {
         logger.error("Simulator Error : " + e.getMessage());
@@ -226,8 +252,9 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
       throw new DefaultModeException("Simulator Error : " + e.getMessage());
     }
 
-    if (hdfsFile) {
+    if (useHdfs) {
       try {
+        Path hdfsPathToData = new Path(pathToData);
         brForData = new BufferedReader(new InputStreamReader(fs.open(hdfsPathToData)));
       } catch (IOException e) {
         logger.error("Simulator Error : " + e.getMessage());
