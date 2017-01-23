@@ -70,8 +70,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   // ---------------------
 
   static {
-//    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
-    DataManagementConfiguration.configure(new File("/home/ap0n/Desktop/a.cfg"));
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
   }
 
   public SpringClientSimulator() {
