@@ -90,19 +90,29 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     String pathPrefix = "";
 
     if (useHdfs) {
+      logger.info("Using hdfs for simulation data");
       hdfsUrl = DataManagementConfiguration.getHdfsUrl();
       if (hdfsUrl.equals("")) {
         hdfsUrl = "hdfs://snf-618466.vm.okeanos.grnet.gr:8020";
+        logger.warn("hdfs.url is empty! Using default: " + hdfsUrl);
+      } else {
+        logger.info("Configured hdfs.url: " + hdfsUrl);
       }
       pathPrefix = DataManagementConfiguration.getHdfsPath();
       if (pathPrefix.equals("")) {
         pathPrefix = "/user/storm/";
+        logger.warn("hdfs.path is empty! Using default: " + pathPrefix);
+      } else {
+        logger.info("Configured hdfs.path: " + pathPrefix);
       }
     } else {
+      logger.info("Using local FS for simulation data");
       pathPrefix = DataManagementConfiguration.getSimulationLocalPath();
     }
     pathToSymbolList = pathPrefix + "/" + symbolListFileName;
     pathToData = pathPrefix + "/" + dataFilename;
+    logger.info("Path to Symbollist.txt: " + pathToSymbolList);
+    logger.info("Path to data.txt: " + pathToData);
   }
 
   private String newlineWithDateToNow(String line) {
