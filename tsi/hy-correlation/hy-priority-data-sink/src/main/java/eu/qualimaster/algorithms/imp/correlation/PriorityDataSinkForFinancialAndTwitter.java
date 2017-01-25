@@ -1,6 +1,7 @@
 package eu.qualimaster.algorithms.imp.correlation;
 
 import eu.qualimaster.data.inf.IPriorityDataSink;
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.sinks.IDataSink;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
@@ -9,6 +10,7 @@ import eu.qualimaster.pipeline.DefaultModeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,9 +26,11 @@ import java.util.Properties;
  */
 public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink, IDataSink {
 
-  private static final String PROPERTIES_PATH = "/var/nfs/qm/tsi/external-service.properties";
-  private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
-  private static int CORRELATION_RESULT_SERVER_PORT = 8888;
+  private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
+  private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
+  private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+  private String correlation_result_server_ip = "";
+  private Integer correlation_result_server_port = -1;
   private Logger logger = LoggerFactory.getLogger(PriorityDataSinkForFinancialAndTwitter.class);
   private Socket socket;
   private PrintWriter writer;
@@ -37,6 +41,10 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   private int measurementDuration;  // seconds
   private boolean terminating;
 
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
+
   public PriorityDataSinkForFinancialAndTwitter() {
     financialMonitoringTimestamp = 0L;
     financialThroughput = 0L;
@@ -46,16 +54,45 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   }
 
   private void readPropertiesFile() {
+    String externalServicePath = DataManagementConfiguration.getExternalServicePath();
+    if (externalServicePath.equals("")) {
+      externalServicePath = DEFAULT_PROPERTIES_PATH;
+      logger.warn("externalService.path is empty. Using default: " + externalServicePath);
+    } else {
+      logger.info("Configured externalService.path: " + externalServicePath);
+    }
+    externalServicePath += "/external-service.properties";
     Properties properties = new Properties();
     FileInputStream inputStream = null;
     try {
-      inputStream = new FileInputStream(PROPERTIES_PATH);
+      inputStream = new FileInputStream(externalServicePath);
+
       properties.load(inputStream);
-      CORRELATION_RESULT_SERVER_IP = properties.getProperty("IP");
-      CORRELATION_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("PORT"));
+      correlation_result_server_ip = properties.getProperty("IP");
+      if (correlation_result_server_ip == null) {
+        correlation_result_server_ip = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + correlation_result_server_ip);
+      } else {
+        logger.info("Using external-service IP: " + correlation_result_server_ip);
+      }
+
+      correlation_result_server_port = Integer.parseInt(properties.getProperty("PORT"));
+      if (correlation_result_server_port == null) {
+        correlation_result_server_port = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found! Using default: " + correlation_result_server_port);
+      } else {
+        logger.info("Using external-service PORT: " + correlation_result_server_port);
+      }
+
     } catch (IOException ioex) {
       ioex.printStackTrace();
     } finally {
+      correlation_result_server_ip = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      correlation_result_server_port = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      logger.warn("external-service.properties file not found under " + externalServicePath
+                  + ". Using default IP: " + correlation_result_server_ip
+                  + " and PORT: " + correlation_result_server_port);
+      
       if (inputStream != null) {
         try {
           inputStream.close();
@@ -133,7 +170,7 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   }
 
   private void connectToResultsServer() throws IOException {
-    socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
+    socket = new Socket(correlation_result_server_ip, correlation_result_server_port);
     writer = new PrintWriter(socket.getOutputStream(), true);
   }
 
@@ -152,8 +189,8 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   @Override
   public void disconnect() throws DefaultModeException {
     terminating = true;
-    writer.close();
     try {
+      writer.close();
       socket.close();
     } catch (IOException e) {
     }
