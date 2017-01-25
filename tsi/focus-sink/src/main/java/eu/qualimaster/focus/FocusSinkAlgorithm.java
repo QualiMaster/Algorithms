@@ -1,12 +1,14 @@
 package eu.qualimaster.focus;
 
 import eu.qualimaster.data.inf.IFocusSink;
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,13 +22,19 @@ import java.util.Properties;
  */
 public class FocusSinkAlgorithm implements IFocusSink {
 
-  private static final String PROPERTIES_PATH = "/var/nfs/qm/tsi/external-service.properties";
-  private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
-  private static int CORRELATION_RESULT_SERVER_PORT = 8888;
+  private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
+  private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
+  private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+  private String correlationResultServerIp = "";
+  private Integer correlationResultServerPort = -1;
   private Logger logger = LoggerFactory.getLogger(FocusSinkAlgorithm.class);
   private Socket socket;
   private boolean terminated;
   private PrintWriter writer;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
 
   public FocusSinkAlgorithm() {
     this.terminated = false;
@@ -110,25 +118,51 @@ public class FocusSinkAlgorithm implements IFocusSink {
   }
 
   private void readPropertiesFile() {
+    String externalServicePath = DataManagementConfiguration.getExternalServicePath();
+    if (externalServicePath.equals("")) {
+      externalServicePath = DEFAULT_PROPERTIES_PATH;
+      logger.warn("externalService.path is empty. Using default: " + externalServicePath);
+    } else {
+      logger.info("Configured externalService.path: " + externalServicePath);
+    }
+    externalServicePath += "/external-service.properties";
     Properties properties = new Properties();
     FileInputStream inputStream = null;
     try {
-      inputStream = new FileInputStream(PROPERTIES_PATH);
+      inputStream = new FileInputStream(externalServicePath);
+
       properties.load(inputStream);
-      CORRELATION_RESULT_SERVER_IP = properties.getProperty("IP");
-      CORRELATION_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("PORT"));
+      correlationResultServerIp = properties.getProperty("IP");
+      if (correlationResultServerIp == null) {
+        correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + correlationResultServerIp);
+      } else {
+        logger.info("Using external-service IP: " + correlationResultServerIp);
+      }
+
+      correlationResultServerPort = Integer.parseInt(properties.getProperty("PORT"));
+      if (correlationResultServerPort == null) {
+        correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found! Using default: " + correlationResultServerPort);
+      } else {
+        logger.info("Using external-service PORT: " + correlationResultServerPort);
+      }
+
     } catch (IOException ioex) {
       logger.error(ioex.getMessage(), ioex);
     } finally {
+      correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      logger.warn("external-service.properties file not found under " + externalServicePath
+                  + ". Using default IP: " + correlationResultServerIp
+                  + " and PORT: " + correlationResultServerPort);
+
       if (inputStream != null) {
         try {
           inputStream.close();
         } catch (IOException ex) {
-          logger.warn(
-              PROPERTIES_PATH + " not found! Using default IP: " + CORRELATION_RESULT_SERVER_IP
-              + " PORT: " + CORRELATION_RESULT_SERVER_PORT);
           // Ignore exception, means file not found or something similar. Fall back to defaults.
-          //          ex.printStackTrace();
+//          ex.printStackTrace();
         }
       }
     }
@@ -162,7 +196,7 @@ public class FocusSinkAlgorithm implements IFocusSink {
 
   private void connectToResultsServer() throws IOException {
     logger.info("Connecting to results server");
-    socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
+    socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     logger.info("Connected. IP: " + socket.getInetAddress().getHostAddress()
                 + " PORT:" + socket.getPort());
     writer = new PrintWriter(socket.getOutputStream(), true);

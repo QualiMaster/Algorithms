@@ -1,12 +1,14 @@
 package eu.qualimaster.algorithms.imp;
 
 import eu.qualimaster.data.inf.ITransferSink;
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.sinks.IDataSink;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,16 +21,22 @@ import java.util.Properties;
  */
 public class TransferSink implements ITransferSink, IDataSink {
 
-  private static final String PROPERTIES_PATH = "/var/nfs/qm/tsi/external-service.properties";
-  private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
-  private static int CORRELATION_RESULT_SERVER_PORT = 8888;
-  private static String REPLAY_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
-  private static int REPLAY_RESULT_SERVER_PORT = 8888;
+  private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
+  private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
+  private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+  private String correlationResultServerIp = "";
+  private Integer correlationResultServerPort = -1;
+  private String replayCorrelationResultServerIp = "";
+  private Integer replayCorrelationResultServerPort = -1;
   private Logger logger = LoggerFactory.getLogger(TransferSink.class);
   private Socket socket, replaySocket;
   private PrintWriter writer, replayWriter;
 
   private boolean terminating;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
 
   public TransferSink() {
     readPropertiesFile();
@@ -36,18 +44,65 @@ public class TransferSink implements ITransferSink, IDataSink {
   }
 
   private void readPropertiesFile() {
+    String externalServicePath = DataManagementConfiguration.getExternalServicePath();
+    if (externalServicePath.equals("")) {
+      externalServicePath = DEFAULT_PROPERTIES_PATH;
+      logger.warn("externalService.path is empty. Using default: " + externalServicePath);
+    } else {
+      logger.info("Configured externalService.path: " + externalServicePath);
+    }
+    externalServicePath += "/external-service.properties";
     Properties properties = new Properties();
     FileInputStream inputStream = null;
     try {
-      inputStream = new FileInputStream(PROPERTIES_PATH);
+      inputStream = new FileInputStream(externalServicePath);
+
       properties.load(inputStream);
-      CORRELATION_RESULT_SERVER_IP = properties.getProperty("IP");
-      CORRELATION_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("PORT"));
-      REPLAY_RESULT_SERVER_IP = properties.getProperty("REPLAY_IP");
-      REPLAY_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("REPLAY_PORT"));
+      correlationResultServerIp = properties.getProperty("IP");
+      if (correlationResultServerIp == null) {
+        correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + correlationResultServerIp);
+      } else {
+        logger.info("Using external-service IP: " + correlationResultServerIp);
+      }
+
+      correlationResultServerPort = Integer.parseInt(properties.getProperty("PORT"));
+      if (correlationResultServerPort == null) {
+        correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found! Using default: " + correlationResultServerPort);
+      } else {
+        logger.info("Using external-service PORT: " + correlationResultServerPort);
+      }
+
+      replayCorrelationResultServerIp = properties.getProperty("REPLAY_IP");
+      if (replayCorrelationResultServerIp == null) {
+        replayCorrelationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + replayCorrelationResultServerIp);
+      } else {
+        logger.info("Using replay external-service IP: " + replayCorrelationResultServerIp);
+      }
+
+      replayCorrelationResultServerPort = Integer.parseInt(properties.getProperty("REPLAY_PORT"));
+      if (replayCorrelationResultServerPort == null) {
+        replayCorrelationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found for replay! Using default: " + replayCorrelationResultServerPort);
+      } else {
+        logger.info("Using replay external-service PORT: " + replayCorrelationResultServerPort);
+      }
+
     } catch (IOException ioex) {
       ioex.printStackTrace();
     } finally {
+      correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      replayCorrelationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      replayCorrelationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      logger.warn("external-service.properties file not found under " + externalServicePath
+                  + ". Using default IP: " + correlationResultServerIp
+                  + ", PORT: " + correlationResultServerPort
+                  + ", replay IP: " + replayCorrelationResultServerIp
+                  + ", replay PORT: " + replayCorrelationResultServerPort);
+
       if (inputStream != null) {
         try {
           inputStream.close();
@@ -114,12 +169,12 @@ public class TransferSink implements ITransferSink, IDataSink {
   }
 
   private void connectToReplayServer() throws IOException {
-    replaySocket = new Socket(REPLAY_RESULT_SERVER_IP, REPLAY_RESULT_SERVER_PORT);
+    replaySocket = new Socket(replayCorrelationResultServerIp, replayCorrelationResultServerPort);
     replayWriter = new PrintWriter(replaySocket.getOutputStream(), true);
   }
 
   private void connectToNormalServer() throws IOException {
-    socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
+    socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     writer = new PrintWriter(socket.getOutputStream(), true);
   }
 

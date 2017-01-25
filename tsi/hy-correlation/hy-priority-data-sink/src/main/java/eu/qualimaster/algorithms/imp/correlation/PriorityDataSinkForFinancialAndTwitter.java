@@ -29,8 +29,8 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
   private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
-  private String correlation_result_server_ip = "";
-  private Integer correlation_result_server_port = -1;
+  private String correlationResultServerIp = "";
+  private Integer correlationResultServerPort = -1;
   private Logger logger = LoggerFactory.getLogger(PriorityDataSinkForFinancialAndTwitter.class);
   private Socket socket;
   private PrintWriter writer;
@@ -68,30 +68,30 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
       inputStream = new FileInputStream(externalServicePath);
 
       properties.load(inputStream);
-      correlation_result_server_ip = properties.getProperty("IP");
-      if (correlation_result_server_ip == null) {
-        correlation_result_server_ip = DEFAULT_CORRELATION_RESULT_SERVER_IP;
-        logger.warn("IP property not found! Using default: " + correlation_result_server_ip);
+      correlationResultServerIp = properties.getProperty("IP");
+      if (correlationResultServerIp == null) {
+        correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + correlationResultServerIp);
       } else {
-        logger.info("Using external-service IP: " + correlation_result_server_ip);
+        logger.info("Using external-service IP: " + correlationResultServerIp);
       }
 
-      correlation_result_server_port = Integer.parseInt(properties.getProperty("PORT"));
-      if (correlation_result_server_port == null) {
-        correlation_result_server_port = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
-        logger.warn("PORT property not found! Using default: " + correlation_result_server_port);
+      correlationResultServerPort = Integer.parseInt(properties.getProperty("PORT"));
+      if (correlationResultServerPort == null) {
+        correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found! Using default: " + correlationResultServerPort);
       } else {
-        logger.info("Using external-service PORT: " + correlation_result_server_port);
+        logger.info("Using external-service PORT: " + correlationResultServerPort);
       }
 
     } catch (IOException ioex) {
       ioex.printStackTrace();
     } finally {
-      correlation_result_server_ip = DEFAULT_CORRELATION_RESULT_SERVER_IP;
-      correlation_result_server_port = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
       logger.warn("external-service.properties file not found under " + externalServicePath
-                  + ". Using default IP: " + correlation_result_server_ip
-                  + " and PORT: " + correlation_result_server_port);
+                  + ". Using default IP: " + correlationResultServerIp
+                  + " and PORT: " + correlationResultServerPort);
       
       if (inputStream != null) {
         try {
@@ -170,7 +170,7 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   }
 
   private void connectToResultsServer() throws IOException {
-    socket = new Socket(correlation_result_server_ip, correlation_result_server_port);
+    socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     writer = new PrintWriter(socket.getOutputStream(), true);
   }
 

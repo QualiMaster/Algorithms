@@ -1,12 +1,14 @@
 package eu.qualimaster.timegraph;
 
 import eu.qualimaster.data.inf.ITimeTravelSink;
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,15 +20,19 @@ import java.util.Properties;
  */
 public class TimeTravelSink implements ITimeTravelSink {
 
+  private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
+  private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
+  private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+  private String correlationResultServerIp = "";
+  private Integer correlationResultServerPort = -1;
   private static final Logger logger = LoggerFactory.getLogger(TimeTravelSink.class);
-  private static final String PROPERTIES_PATH = "/var/nfs/qm/tsi/external-service.properties";
-  //  private static String CORRELATION_RESULT_SERVER_IP = "snf-618466.vm.okeanos.grnet.gr";
-  private static String CORRELATION_RESULT_SERVER_IP = "147.27.14.117";
-  //  private static String CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
-  private static int CORRELATION_RESULT_SERVER_PORT = 8888;
   private Socket socket;
   private PrintWriter writer;
   private boolean terminated;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
 
   public TimeTravelSink() {
     this.terminated = false;
@@ -120,17 +126,45 @@ public class TimeTravelSink implements ITimeTravelSink {
   }
 
   private void readPropertiesFile() {
+    String externalServicePath = DataManagementConfiguration.getExternalServicePath();
+    if (externalServicePath.equals("")) {
+      externalServicePath = DEFAULT_PROPERTIES_PATH;
+      logger.warn("externalService.path is empty. Using default: " + externalServicePath);
+    } else {
+      logger.info("Configured externalService.path: " + externalServicePath);
+    }
+    externalServicePath += "/external-service.properties";
     Properties properties = new Properties();
     FileInputStream inputStream = null;
     try {
-      inputStream = new FileInputStream(PROPERTIES_PATH);
+      inputStream = new FileInputStream(externalServicePath);
+
       properties.load(inputStream);
-      CORRELATION_RESULT_SERVER_IP = properties.getProperty("IP");
-      CORRELATION_RESULT_SERVER_PORT = Integer.parseInt(properties.getProperty("PORT"));
+      correlationResultServerIp = properties.getProperty("IP");
+      if (correlationResultServerIp == null) {
+        correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+        logger.warn("IP property not found! Using default: " + correlationResultServerIp);
+      } else {
+        logger.info("Using external-service IP: " + correlationResultServerIp);
+      }
+
+      correlationResultServerPort = Integer.parseInt(properties.getProperty("PORT"));
+      if (correlationResultServerPort == null) {
+        correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+        logger.warn("PORT property not found! Using default: " + correlationResultServerPort);
+      } else {
+        logger.info("Using external-service PORT: " + correlationResultServerPort);
+      }
     } catch (IOException ioex) {
       System.err.println(ioex.getMessage());
       ioex.printStackTrace();
     } finally {
+      correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
+      correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
+      logger.warn("external-service.properties file not found under " + externalServicePath
+                  + ". Using default IP: " + correlationResultServerIp
+                  + " and PORT: " + correlationResultServerPort);
+
       if (inputStream != null) {
         try {
           inputStream.close();
@@ -143,7 +177,7 @@ public class TimeTravelSink implements ITimeTravelSink {
   }
 
   private void connectToResultsServer() throws IOException {
-    socket = new Socket(CORRELATION_RESULT_SERVER_IP, CORRELATION_RESULT_SERVER_PORT);
+    socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     writer = new PrintWriter(socket.getOutputStream());
   }
 }
