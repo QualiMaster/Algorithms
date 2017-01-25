@@ -15,8 +15,10 @@ import java.util.Vector;
  */
 public class DataConnector {
 
-  public static final String SERVER_IP = "84.200.210.254";// Quote Server IP
-  public static final int SERVER_Port = 9003; // Quote Server Port
+//  public static final String SERVER_IP = "84.200.210.254";// Quote Server IP
+  public static final String SERVER_IP = "godzilla.kbs.uni-hannover.de";// Tunneling
+//  public static final int SERVER_Port = 9003; // Quote Server Port
+  public static final int SERVER_Port = 5566; // Tunneling
 
   private boolean running = false;
   private Socket tcpSocket = null;
