@@ -8,6 +8,7 @@ import eu.qualimaster.observables.IObservable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -103,13 +104,8 @@ public class TimeTravelSink implements ITimeTravelSink {
   @Override
   public void disconnect() {
     terminated = true;
-    writer.close();
-    try {
-      socket.close();
-    } catch (IOException e) {
-      logger.error(e.getMessage(), e);
-//      throw new DefaultModeException(e.getMessage(), e);
-    }
+    closeQuietly(writer);
+    closeQuietly(socket);
   }
 
   @Override
@@ -179,5 +175,15 @@ public class TimeTravelSink implements ITimeTravelSink {
   private void connectToResultsServer() throws IOException {
     socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     writer = new PrintWriter(socket.getOutputStream());
+  }
+
+  private void closeQuietly(Closeable closable) {
+    if (closable != null) {
+      try {
+        closable.close();
+      } catch (IOException e) {
+        // Ignore the exception
+      }
+    }
   }
 }

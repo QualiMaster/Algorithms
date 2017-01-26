@@ -142,13 +142,8 @@ public class DynamicGraphSinkAlgorithm implements IDynamicGraphSink {
   @Override
   public void disconnect() {
     terminated = true;
-    writer.close();
-    try {
-      socket.close();
-    } catch (IOException e) {
-      logger.error(e.getMessage(), e);
-//      throw new DefaultModeException(e.getMessage());
-    }
+    closeQuietly(writer);
+    closeQuietly(socket);
   }
 
   @Override
@@ -169,5 +164,15 @@ public class DynamicGraphSinkAlgorithm implements IDynamicGraphSink {
   private void connectToResultsServer() throws IOException {
     socket = new Socket(correlationResultServerIp, correlationResultServerPort);
     writer = new PrintWriter(socket.getOutputStream(), true);
+  }
+
+  private void closeQuietly(java.io.Closeable closable) {
+    if (closable != null) {
+      try {
+        closable.close();
+      } catch (IOException e) {
+        // Ignore the exception
+      }
+    }
   }
 }

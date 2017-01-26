@@ -28,6 +28,7 @@ public class QueriesSource implements ITimeGraphQueriesSource {
   private String pathQueryVertexA;
   private String pathQueryVertexB;
   private DateFormat dateFormat;
+  private boolean connected;
 
   public QueriesSource() {
     this.start = -1;
@@ -36,11 +37,12 @@ public class QueriesSource implements ITimeGraphQueriesSource {
     pathQueryVertexA = "";
     pathQueryVertexB = "";
     dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH.mm.ss");
+    connected = false;
   }
 
   @Override
   public ITimeGraphQueriesSourceSnapshotQueryStreamOutput getSnapshotQueryStream() {
-    if (start != -1 && end != -1 && pathQueryType.equals("")) {
+    if (connected && start != -1 && end != -1 && pathQueryType.equals("")) {
       logger.info("Sending snapshots query");
       TimeGraphQueriesSource.TimeGraphQueriesSourceSnapshotQueryStreamOutput
           o = new TimeGraphQueriesSource.TimeGraphQueriesSourceSnapshotQueryStreamOutput();
@@ -69,7 +71,7 @@ public class QueriesSource implements ITimeGraphQueriesSource {
 
   @Override
   public ITimeGraphQueriesSourcePathQueryStreamOutput getPathQueryStream() {
-    if (start != -1 && end != -1 && !pathQueryType.equals("")) {
+    if (connected && start != -1 && end != -1 && !pathQueryType.equals("")) {
       logger.info("Sending path query");
       TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput
           o = new TimeGraphQueriesSource.TimeGraphQueriesSourcePathQueryStreamOutput();
@@ -161,12 +163,12 @@ public class QueriesSource implements ITimeGraphQueriesSource {
 
   @Override
   public void connect() {
-    // Do nothing here
+    connected = true;
   }
 
   @Override
   public void disconnect() {
-    // Do nothing here
+    connected = false;
   }
 
   @Override

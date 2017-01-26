@@ -10,6 +10,7 @@ import eu.qualimaster.pipeline.DefaultModeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -189,11 +190,8 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   @Override
   public void disconnect() throws DefaultModeException {
     terminating = true;
-    try {
-      writer.close();
-      socket.close();
-    } catch (IOException e) {
-    }
+    closeQuietly(writer);
+    closeQuietly(socket);
   }
 
   @Override
@@ -225,6 +223,16 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
                     + " tuples/sec");
         financialMonitoringTimestamp = now;
         financialThroughput = 1;
+      }
+    }
+  }
+
+  private void closeQuietly(Closeable closable) {
+    if (closable != null) {
+      try {
+        closable.close();
+      } catch (IOException e) {
+        // Ignore the exception
       }
     }
   }

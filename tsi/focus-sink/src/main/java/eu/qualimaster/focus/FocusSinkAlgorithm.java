@@ -171,12 +171,8 @@ public class FocusSinkAlgorithm implements IFocusSink {
   @Override
   public void disconnect() {
     terminated = true;
-    writer.close();
-    try {
-      socket.close();
-    } catch (IOException e) {
-      logger.error(e.getMessage(), e);
-    }
+    closeQuietly(writer);
+    closeQuietly(socket);
   }
 
   @Override
@@ -200,5 +196,15 @@ public class FocusSinkAlgorithm implements IFocusSink {
     logger.info("Connected. IP: " + socket.getInetAddress().getHostAddress()
                 + " PORT:" + socket.getPort());
     writer = new PrintWriter(socket.getOutputStream(), true);
+  }
+
+  private void closeQuietly(java.io.Closeable closable) {
+    if (closable != null) {
+      try {
+        closable.close();
+      } catch (IOException e) {
+        // Ignore the exception
+      }
+    }
   }
 }

@@ -191,13 +191,10 @@ public class TransferSink implements ITransferSink, IDataSink {
 
   @Override public void disconnect() {
     terminating = true;
-    writer.close();
-    replayWriter.close();
-    try {
-      socket.close();
-      replaySocket.close();
-    } catch (IOException e) {
-    }
+    closeQuietly(writer);
+    closeQuietly(socket);
+    closeQuietly(replayWriter);
+    closeQuietly(replaySocket);
   }
 
   @Override public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
@@ -210,5 +207,15 @@ public class TransferSink implements ITransferSink, IDataSink {
 
   @Override public Double getMeasurement(IObservable iObservable) {
     return null;
+  }
+
+  private void closeQuietly(java.io.Closeable closable) {
+    if (closable != null) {
+      try {
+        closable.close();
+      } catch (IOException e) {
+        // Ignore the exception
+      }
+    }
   }
 }

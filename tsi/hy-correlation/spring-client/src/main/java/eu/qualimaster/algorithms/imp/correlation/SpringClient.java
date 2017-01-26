@@ -38,14 +38,20 @@ public class SpringClient implements ISpringFinancialData {
   private boolean saveLocalData = false;
   private Map<String, String> idsToNamesMap;
   private IDataSourceListener mappingChangedListener;
+  private boolean connected;
 
   public SpringClient() {
     allSymbolsList = new ArrayList<>();
     idsToNamesMap = new HashMap<>();
     lastConfigurationEmittion = 0;
+    connected = false;
   }
 
   @Override public ISpringFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
+    if (!connected) {
+      return null;
+    }
+
     connector.execute();
     String tmpData = connector.getData();
     if (tmpData != null && !tmpData.equals("")) {
@@ -94,6 +100,10 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   @Override public ISpringFinancialDataSymbolListOutput getSymbolList() {
+    if (!connected) {
+      return null;
+    }
+
     long now = System.currentTimeMillis();
 
     if (now - lastConfigurationEmittion >= 10000 || lastConfigurationEmittion == 0) {  // resend every 10 secs
@@ -212,6 +222,9 @@ public class SpringClient implements ISpringFinancialData {
    */
   public void init(String username) {
 
+    logger.info("Connecting...");
+    connected = true;
+
     dataOutputController.init();
     try {
       loginAction(username);
@@ -273,6 +286,7 @@ public class SpringClient implements ISpringFinancialData {
 
   @Override public void disconnect() {
     // TODO(npavlakis): Disconnect here
+    connected = false;
   }
 
   @Override public IStorageStrategyDescriptor getStrategy() {
