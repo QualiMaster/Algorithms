@@ -225,8 +225,6 @@ public class SpringClient implements ISpringFinancialData {
     idsToNamesMap = new HashMap<>();
     lastConfigurationEmittion = 0;
 
-    connected = true;
-
     dataOutputController.init();
     try {
       loginAction(username);
@@ -271,6 +269,7 @@ public class SpringClient implements ISpringFinancialData {
     if (mappingChangedListener != null) {
       mappingChangedListener.notifyIdsNamesMapChanged();
     }
+    connected = true; // The flag also needs to be updated inside "init", for FocusedSpringClient
   }
 
   @Override public void connect() {
@@ -287,6 +286,7 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   @Override public void disconnect() {
+    connected = false;
     try {
       connector.logout();
     } catch (IOException e) {
@@ -295,7 +295,6 @@ public class SpringClient implements ISpringFinancialData {
     }
     allSymbolsList = null;
     idsToNamesMap = null;
-    connected = false;
   }
 
   @Override public IStorageStrategyDescriptor getStrategy() {
