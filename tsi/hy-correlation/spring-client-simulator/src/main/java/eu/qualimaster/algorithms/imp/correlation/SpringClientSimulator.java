@@ -8,7 +8,6 @@ import eu.qualimaster.dataManagement.sources.IHistoricalDataProvider;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
 import eu.qualimaster.pipeline.DefaultModeException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -17,13 +16,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,8 +55,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   private double speedFactor;
   private long lastConfigurationEmittion;
   private boolean shouldReadNextLine;
-  private String
-      lineRead;
+  private String lineRead;
   // Holds the line that was read from the file, so that we can emit it once the time passes
   private long startSleeping;
   private Map<String, String> idsToNamesMap;
@@ -74,15 +66,6 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   private int measurementDuration;  // seconds
 
   public SpringClientSimulator() {
-    financialMonitoringTimestamp = 0L;
-    finacialThroughput = 0L;
-    measurementDuration = 1 * 60;
-    speedFactor = 1.0;
-    prevTimeStampNow = 0;
-    lastConfigurationEmittion = 0;
-    idsToNamesMap = new HashMap<>();
-    startSleeping = 0;
-
     String symbolListFileName = "Symbollist.txt";
     String dataFilename = "data.txt";
     useHdfs = DataManagementConfiguration.useSimulationHdfs();
@@ -122,14 +105,16 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     //end split
     String newline = null;
     try {
-      DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr).getTime());
+      DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr)
+                                                 .getTime());
       DateTime symbolTimeStampNow = symbolTimeStamp.plus(offsetInMillis);
       thisTimeStampNow = symbolTimeStampNow.getMillis();
       //            System.out.println(
       //                "Original " + symbolTimeStamp + " New " + symbolTimeStampNow + " offset "
       //                    + offsetInMillis);
       //rejoin data
-      String newDate[] = symbolTimeStampNow.toString(dtf).split(" ");
+      String newDate[] = symbolTimeStampNow.toString(dtf)
+                                           .split(" ");
       newline = ar[0] + "," + newDate[0] + "," + newDate[1] + "," + ar[3] + "," + ar[4];
       //end rejoin
     } catch (ParseException e) {
@@ -144,7 +129,8 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     String dateStr = ar[1] + " " + ar[2];
     //end split
     try {
-      DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr).getTime());
+      DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr)
+                                                 .getTime());
       DateTime symbolTimeStampNow = symbolTimeStamp.plus(offsetInMillis);
       thisTimeStampNow = symbolTimeStampNow.getMillis();
     } catch (ParseException e) {
@@ -152,8 +138,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     }
   }
 
-  @Override
-  public ISimulatedFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
+  @Override public ISimulatedFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
     if (brForData == null) {  // taking this as a sign for not connected
       return null;
     }
@@ -178,7 +163,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
       prevTimeStampNow = thisTimeStampNow;
     }
     ISimulatedFinancialDataSpringStreamOutput symbolTuple =
-        new SimulatedFinancialData.SimulatedFinancialDataSpringStreamOutput();
+      new SimulatedFinancialData.SimulatedFinancialDataSpringStreamOutput();
     symbolTuple.setSymbolTuple(lineRead);
 
     try {
@@ -195,8 +180,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     return symbolTuple;
   }
 
-  @Override
-  public String getAggregationKey(ISimulatedFinancialDataSpringStreamOutput tuple) {
+  @Override public String getAggregationKey(ISimulatedFinancialDataSpringStreamOutput tuple) {
     String result;
     String data = tuple.getSymbolTuple();
     int pos = data.indexOf(",");
@@ -208,13 +192,11 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     return result;
   }
 
-  @Override
-  public void setParameterSpeedFactor(double v) {
+  @Override public void setParameterSpeedFactor(double v) {
     setSpeed(v);
   }
 
-  @Override
-  public ISimulatedFinancialDataSymbolListOutput getSymbolList() {
+  @Override public ISimulatedFinancialDataSymbolListOutput getSymbolList() {
 
     if (allSymbolsList == null) {  // taking this as a sign for not connected
       return null;
@@ -225,21 +207,30 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     if (now - lastConfigurationEmittion >= 10000 || lastConfigurationEmittion == 0) {
       lastConfigurationEmittion = now;
       ISimulatedFinancialDataSymbolListOutput allSymbols =
-          new SimulatedFinancialData.SimulatedFinancialDataSymbolListOutput();
+        new SimulatedFinancialData.SimulatedFinancialDataSymbolListOutput();
       allSymbols.setAllSymbols(allSymbolsList);
       return allSymbols;
     }
     return null;
   }
 
-  @Override
-  public String getAggregationKey(ISimulatedFinancialDataSymbolListOutput tuple) {
+  @Override public String getAggregationKey(ISimulatedFinancialDataSymbolListOutput tuple) {
     return null;
   }
 
   public void connect() throws DefaultModeException {
     logger.info("Connecting...");
+
+    financialMonitoringTimestamp = 0L;
+    finacialThroughput = 0L;
+    measurementDuration = 1 * 60;
+    speedFactor = 1.0;
+    prevTimeStampNow = 0;
+    lastConfigurationEmittion = 0;
+    idsToNamesMap = new HashMap<>();
+    startSleeping = 0;
     allSymbolsList = new ArrayList<>();
+
     // Load allSymbols file
     if (useHdfs) {
       hdfsConfig = new Configuration();
@@ -301,7 +292,8 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
         String dateStr = ar[1] + " " + ar[2];
         //end split
         try {
-          DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr).getTime());
+          DateTime symbolTimeStamp = new DateTime(sdf.parse(dateStr)
+                                                     .getTime());
           offsetInMillis = now.getMillis() - symbolTimeStamp.getMillis();
         } catch (ParseException e) {
           logger.error("Simulator Error : " + e.getMessage());
@@ -326,6 +318,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     closeQuietly(brForList);
     brForList = null;
     allSymbolsList = null;
+    idsToNamesMap = null;
 
     closeQuietly(brForData);
     brForData = null;
@@ -347,18 +340,15 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     return null;
   }
 
-  @Override
-  public IHistoricalDataProvider getHistoricalDataProvider() {
+  @Override public IHistoricalDataProvider getHistoricalDataProvider() {
     return null;
   }
 
-  @Override
-  public Map<String, String> getIdsNamesMap() {
+  @Override public Map<String, String> getIdsNamesMap() {
     return idsToNamesMap;
   }
 
-  @Override
-  public void setDataSourceListener(IDataSourceListener iDataSourceListener) {
+  @Override public void setDataSourceListener(IDataSourceListener iDataSourceListener) {
     mappingChangedListener = iDataSourceListener;
     mappingChangedListener.notifyIdsNamesMapChanged();
   }
@@ -373,8 +363,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
         ++finacialThroughput;
       } else {
         logger.info(
-            "Pipeline financial input throughput: " + ((double) finacialThroughput
-                                                       / (double) measurementDuration)
+          "Pipeline financial input throughput: " + ((double) finacialThroughput / (double) measurementDuration)
             + " tuples/sec");
         financialMonitoringTimestamp = now;
         finacialThroughput = 1;

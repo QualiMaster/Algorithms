@@ -41,9 +41,6 @@ public class SpringClient implements ISpringFinancialData {
   private boolean connected;
 
   public SpringClient() {
-    allSymbolsList = new ArrayList<>();
-    idsToNamesMap = new HashMap<>();
-    lastConfigurationEmittion = 0;
     connected = false;
   }
 
@@ -223,6 +220,11 @@ public class SpringClient implements ISpringFinancialData {
   public void init(String username) {
 
     logger.info("Connecting...");
+
+    allSymbolsList = new ArrayList<>();
+    idsToNamesMap = new HashMap<>();
+    lastConfigurationEmittion = 0;
+
     connected = true;
 
     dataOutputController.init();
@@ -285,7 +287,14 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   @Override public void disconnect() {
-    // TODO(npavlakis): Disconnect here
+    try {
+      connector.logout();
+    } catch (IOException e) {
+      logger.warn("Tried to logout from the API, but something went wrong with the connection.");
+      // Session will timeout an un-subscribe us anyway.
+    }
+    allSymbolsList = null;
+    idsToNamesMap = null;
     connected = false;
   }
 
