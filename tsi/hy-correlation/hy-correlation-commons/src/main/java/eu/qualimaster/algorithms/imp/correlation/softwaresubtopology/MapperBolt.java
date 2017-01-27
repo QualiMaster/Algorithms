@@ -78,8 +78,6 @@ public class MapperBolt extends BaseSignalBolt {
 
       if (!hasInitialized) {
 
-        hasInitialized = true;
-
         // configurationStream
         List<String> allSymbols;
 
@@ -94,7 +92,10 @@ public class MapperBolt extends BaseSignalBolt {
                   .getAllSymbols();
         }
 
-        EmitMappingConfiguration(allSymbols, tuple);
+        if (allSymbols != null) {
+          hasInitialized = true;
+          EmitMappingConfiguration(allSymbols, tuple);
+        }
       }
     } else if (tuple.getValue(0)
                    instanceof IFCorrelationFinancial.IIFCorrelationFinancialPreprocessedStreamInput
