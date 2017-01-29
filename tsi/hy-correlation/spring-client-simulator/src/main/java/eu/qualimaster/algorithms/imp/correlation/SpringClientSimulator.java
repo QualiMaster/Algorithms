@@ -62,6 +62,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   // Throughput measurement
   private long financialMonitoringTimestamp;
   private long finacialThroughput;
+  private boolean isConnected;
   // ---------------------
   private int measurementDuration;  // seconds
 
@@ -139,7 +140,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   }
 
   @Override public ISimulatedFinancialDataSpringStreamOutput getSpringStream() throws DefaultModeException {
-    if (brForData == null) {  // taking this as a sign for not connected
+    if (!isConnected) {  // contract: return null if not connected
       return null;
     }
 
@@ -198,7 +199,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
 
   @Override public ISimulatedFinancialDataSymbolListOutput getSymbolList() {
 
-    if (allSymbolsList == null) {  // taking this as a sign for not connected
+    if (!isConnected) {  // contract: return null if not connected
       return null;
     }
 
@@ -218,7 +219,10 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     return null;
   }
 
-  public void connect() throws DefaultModeException {
+  @Override public void connect() throws DefaultModeException {
+    if (isConnected) { // contract: ignore re-connects
+        return;
+    }
     logger.info("Connecting...");
 
     financialMonitoringTimestamp = 0L;
@@ -311,10 +315,13 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     if (mappingChangedListener != null) {
       mappingChangedListener.notifyIdsNamesMapChanged();
     }
+    isConnected = true;
   }
 
-  public void disconnect() {
-    // TODO(npavlakis): Disconnect here
+  @Override public void disconnect() {
+    if (!isConnected) { // contract: ignore re-disconnects
+        return;
+    }
     closeQuietly(brForList);
     brForList = null;
     allSymbolsList = null;
