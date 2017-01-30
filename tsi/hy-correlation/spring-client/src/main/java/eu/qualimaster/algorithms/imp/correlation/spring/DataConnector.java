@@ -59,7 +59,7 @@ public class DataConnector {
    * DataConnector.CONNECTION_ERROR
    */
   public int connect() {
-    if(!DataManagementConfiguration.getExternalServicePath().contains("/var/nfs/qm")) {
+    if(!DataManagementConfiguration.getExternalServicePath().contains("/var/nfs")) {
       // Just a temporary "hack". Use the tunneling IP/port if the cluster does not have nfs.
       // TODO : Read configuration about Server IP and Server Port
       SERVER_IP = "godzilla.kbs.uni-hannover.de";// Tunneling

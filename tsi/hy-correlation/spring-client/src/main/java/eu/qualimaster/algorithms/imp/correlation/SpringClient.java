@@ -274,7 +274,6 @@ public class SpringClient implements ISpringFinancialData {
 
   @Override public void connect() {
     init("springClient");
-
     try {
       startQuoteAllAction();
     } catch (Exception e) {
