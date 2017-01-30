@@ -1,5 +1,7 @@
 package eu.qualimaster.algorithms.imp.correlation.spring;
 
+import eu.qualimaster.dataManagement.DataManagementConfiguration;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -15,10 +17,8 @@ import java.util.Vector;
  */
 public class DataConnector {
 
-//  public static final String SERVER_IP = "84.200.210.254";// Quote Server IP
-  public static final String SERVER_IP = "godzilla.kbs.uni-hannover.de";// Tunneling
-//  public static final int SERVER_Port = 9003; // Quote Server Port
-  public static final int SERVER_Port = 5566; // Tunneling
+  public static String SERVER_IP = "84.200.210.254";// Quote Server IP
+  public static int SERVER_Port = 9003; // Quote Server Port
 
   private boolean running = false;
   private Socket tcpSocket = null;
@@ -59,6 +59,12 @@ public class DataConnector {
    * DataConnector.CONNECTION_ERROR
    */
   public int connect() {
+    if(!DataManagementConfiguration.getExternalServicePath().contains("/var/nfs/qm")) {
+      // Just a temporary "hack". Use the tunneling IP/port if the cluster does not have nfs.
+      // TODO : Read configuration about Server IP and Server Port
+      SERVER_IP = "godzilla.kbs.uni-hannover.de";// Tunneling
+      SERVER_Port = 5566; // Tunneling
+    }
     try {
       tcpSocket = new Socket(SERVER_IP, SERVER_Port);
       tcpSocket.setSoTimeout(soTimeout);
