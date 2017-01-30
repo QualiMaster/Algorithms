@@ -84,8 +84,8 @@ public class TopoSoftwareCorrelationFinancial extends AbstractFinancialSubTopolo
 
     int parallelism_hint = PipelineOptions.getExecutorParallelism(config,
                                                                   prefix + "." + hayashiYoshidaName,
-                                                                  13);
-    int tasks = PipelineOptions.getTaskParallelism(config, prefix + "." + hayashiYoshidaName, 13);
+                                                                  4);
+    int tasks = PipelineOptions.getTaskParallelism(config, prefix + "." + hayashiYoshidaName, 4);
 
     topologyBuilder.setBolt(hayashiYoshidaName,
                             new HayashiYoshidaBolt(hayashiYoshidaName, namespace, true, streamId),
