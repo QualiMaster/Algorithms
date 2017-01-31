@@ -30,21 +30,21 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
   private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
   private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
+
   private String correlationResultServerIp = "";
   private Integer correlationResultServerPort = -1;
   private Logger logger = LoggerFactory.getLogger(PriorityDataSinkForFinancialAndTwitter.class);
   private Socket socket;
   private PrintWriter writer;
   private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
-
   private long financialMonitoringTimestamp;
   private long financialThroughput;
   private int measurementDuration;  // seconds
   private boolean terminating;
-
-  static {
-    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
-  }
 
   public PriorityDataSinkForFinancialAndTwitter() {
     financialMonitoringTimestamp = 0L;
@@ -87,13 +87,13 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
 
     } catch (IOException ioex) {
       ioex.printStackTrace();
-    } finally {
+
       correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
       correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
       logger.warn("external-service.properties file not found under " + externalServicePath
                   + ". Using default IP: " + correlationResultServerIp
                   + " and PORT: " + correlationResultServerPort);
-      
+    } finally {
       if (inputStream != null) {
         try {
           inputStream.close();
@@ -107,13 +107,17 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
 
   @Override
   public void postDataPairwiseFinancial(IPriorityDataSinkPairwiseFinancialInput data) {
-    if (terminating) return;
+    if (terminating) {
+      return;
+    }
     emit(-1, data);
   }
 
   @Override
   public void emit(int ticket, IPriorityDataSinkPairwiseFinancialInput data) {
-    if (terminating) return;
+    if (terminating) {
+      return;
+    }
     monitorMe();
     StringBuilder sb = new StringBuilder();
     sb.append("f,");
@@ -130,14 +134,18 @@ public class PriorityDataSinkForFinancialAndTwitter implements IPriorityDataSink
 
   @Override
   public void postDataAnalyzedStream(IPriorityDataSinkAnalyzedStreamInput data) {
-    if (terminating) return;
+    if (terminating) {
+      return;
+    }
     emit(-1, data);
   }
 
   @Override
   public void emit(int ticket,
                    IPriorityDataSinkAnalyzedStreamInput data) {
-    if (terminating) return;
+    if (terminating) {
+      return;
+    }
     StringBuilder sb = new StringBuilder();
     sb.append("w,");
     if (ticket != -1) {

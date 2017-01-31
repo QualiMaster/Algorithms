@@ -5,6 +5,7 @@ import eu.qualimaster.dataManagement.DataManagementConfiguration;
 import eu.qualimaster.dataManagement.sinks.IDataSink;
 import eu.qualimaster.dataManagement.strategies.IStorageStrategyDescriptor;
 import eu.qualimaster.observables.IObservable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,11 @@ public class TransferSink implements ITransferSink, IDataSink {
   private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
   private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
+
   private String correlationResultServerIp = "";
   private Integer correlationResultServerPort = -1;
   private String replayCorrelationResultServerIp = "";
@@ -31,12 +37,7 @@ public class TransferSink implements ITransferSink, IDataSink {
   private Logger logger = LoggerFactory.getLogger(TransferSink.class);
   private Socket socket, replaySocket;
   private PrintWriter writer, replayWriter;
-
   private boolean terminating;
-
-  static {
-    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
-  }
 
   public TransferSink() {
     readPropertiesFile();
@@ -85,14 +86,15 @@ public class TransferSink implements ITransferSink, IDataSink {
       replayCorrelationResultServerPort = Integer.parseInt(properties.getProperty("REPLAY_PORT"));
       if (replayCorrelationResultServerPort == null) {
         replayCorrelationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
-        logger.warn("PORT property not found for replay! Using default: " + replayCorrelationResultServerPort);
+        logger.warn("PORT property not found for replay! Using default: "
+                    + replayCorrelationResultServerPort);
       } else {
         logger.info("Using replay external-service PORT: " + replayCorrelationResultServerPort);
       }
 
     } catch (IOException ioex) {
       ioex.printStackTrace();
-    } finally {
+
       correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
       correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
       replayCorrelationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
@@ -102,7 +104,7 @@ public class TransferSink implements ITransferSink, IDataSink {
                   + ", PORT: " + correlationResultServerPort
                   + ", replay IP: " + replayCorrelationResultServerIp
                   + ", replay PORT: " + replayCorrelationResultServerPort);
-
+    } finally {
       if (inputStream != null) {
         try {
           inputStream.close();
@@ -114,24 +116,29 @@ public class TransferSink implements ITransferSink, IDataSink {
     }
   }
 
-  @Override public void postDataPairwiseFinancial(ITransferSinkPairwiseFinancialInput data) {
+  @Override
+  public void postDataPairwiseFinancial(ITransferSinkPairwiseFinancialInput data) {
     sendToServer(-1, data, false);
   }
 
-  @Override public void emit(int ticket, ITransferSinkPairwiseFinancialInput data) {
+  @Override
+  public void emit(int ticket, ITransferSinkPairwiseFinancialInput data) {
     sendToServer(ticket, data, true);
   }
 
-  private void sendToServer(int ticket, ITransferSinkPairwiseFinancialInput data, boolean isReplay) {
-    if (terminating)
+  private void sendToServer(int ticket, ITransferSinkPairwiseFinancialInput data,
+                            boolean isReplay) {
+    if (terminating) {
       return;
+    }
     StringBuilder sb = new StringBuilder();
     sb.append("te,");
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
-    sb.append(data.getId0()).append(",").append(data.getId1()).append(",").append(data.getDate()).append(",")
-      .append(new DecimalFormat("0.######").format(data.getValue()));
+    sb.append(data.getId0()).append(",").append(data.getId1()).append(",").append(data.getDate())
+        .append(",")
+        .append(new DecimalFormat("0.######").format(data.getValue()));
     sendStr(sb.toString(), isReplay);
   }
 
@@ -178,7 +185,8 @@ public class TransferSink implements ITransferSink, IDataSink {
     writer = new PrintWriter(socket.getOutputStream(), true);
   }
 
-  @Override public void connect() {
+  @Override
+  public void connect() {
     try {
       terminating = false;
       connectToResultsServer();
@@ -189,7 +197,8 @@ public class TransferSink implements ITransferSink, IDataSink {
     }
   }
 
-  @Override public void disconnect() {
+  @Override
+  public void disconnect() {
     terminating = true;
     closeQuietly(writer);
     closeQuietly(socket);
@@ -197,15 +206,18 @@ public class TransferSink implements ITransferSink, IDataSink {
     closeQuietly(replaySocket);
   }
 
-  @Override public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
-
-  }
-
-  @Override public IStorageStrategyDescriptor getStrategy() {
+  @Override
+  public IStorageStrategyDescriptor getStrategy() {
     return null;
   }
 
-  @Override public Double getMeasurement(IObservable iObservable) {
+  @Override
+  public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
+
+  }
+
+  @Override
+  public Double getMeasurement(IObservable iObservable) {
     return null;
   }
 

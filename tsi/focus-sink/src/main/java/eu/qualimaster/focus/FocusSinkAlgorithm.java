@@ -25,16 +25,17 @@ public class FocusSinkAlgorithm implements IFocusSink {
   private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
   private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
+
+  static {
+    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
+  }
+
   private String correlationResultServerIp = "";
   private Integer correlationResultServerPort = -1;
   private Logger logger = LoggerFactory.getLogger(FocusSinkAlgorithm.class);
   private Socket socket;
   private boolean terminated;
   private PrintWriter writer;
-
-  static {
-    DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
-  }
 
   public FocusSinkAlgorithm() {
     this.terminated = false;
@@ -150,13 +151,13 @@ public class FocusSinkAlgorithm implements IFocusSink {
 
     } catch (IOException ioex) {
       logger.error(ioex.getMessage(), ioex);
-    } finally {
+
       correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
       correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
       logger.warn("external-service.properties file not found under " + externalServicePath
                   + ". Using default IP: " + correlationResultServerIp
                   + " and PORT: " + correlationResultServerPort);
-
+    } finally {
       if (inputStream != null) {
         try {
           inputStream.close();

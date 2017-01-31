@@ -24,16 +24,17 @@ public class TimeTravelSink implements ITimeTravelSink {
   private static final String DEFAULT_PROPERTIES_PATH = "/var/nfs/qm/tsi/";
   private static final String DEFAULT_CORRELATION_RESULT_SERVER_IP = "clu01.softnet.tuc.gr";
   private static final int DEFAULT_CORRELATION_RESULT_SERVER_PORT = 8888;
-  private String correlationResultServerIp = "";
-  private Integer correlationResultServerPort = -1;
   private static final Logger logger = LoggerFactory.getLogger(TimeTravelSink.class);
-  private Socket socket;
-  private PrintWriter writer;
-  private boolean terminated;
 
   static {
     DataManagementConfiguration.configure(new File("/var/nfs/qm/qm.infrastructure.cfg"));
   }
+
+  private String correlationResultServerIp = "";
+  private Integer correlationResultServerPort = -1;
+  private Socket socket;
+  private PrintWriter writer;
+  private boolean terminated;
 
   public TimeTravelSink() {
     this.terminated = false;
@@ -41,13 +42,17 @@ public class TimeTravelSink implements ITimeTravelSink {
 
   @Override
   public void postDataSnapshotStream(ITimeTravelSinkSnapshotStreamInput data) {
-    if (terminated) return;
+    if (terminated) {
+      return;
+    }
     emit(-1, data);
   }
 
   @Override
   public void emit(int ticket, ITimeTravelSinkSnapshotStreamInput tuple) {
-    if (terminated) return;
+    if (terminated) {
+      return;
+    }
 
     logger.info("got snapshot stream: " + tuple.getSnapshot());
 
@@ -114,7 +119,8 @@ public class TimeTravelSink implements ITimeTravelSink {
   }
 
   @Override
-  public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {}
+  public void setStrategy(IStorageStrategyDescriptor iStorageStrategyDescriptor) {
+  }
 
   @Override
   public Double getMeasurement(IObservable iObservable) {
@@ -154,13 +160,12 @@ public class TimeTravelSink implements ITimeTravelSink {
     } catch (IOException ioex) {
       System.err.println(ioex.getMessage());
       ioex.printStackTrace();
-    } finally {
       correlationResultServerIp = DEFAULT_CORRELATION_RESULT_SERVER_IP;
       correlationResultServerPort = DEFAULT_CORRELATION_RESULT_SERVER_PORT;
       logger.warn("external-service.properties file not found under " + externalServicePath
                   + ". Using default IP: " + correlationResultServerIp
                   + " and PORT: " + correlationResultServerPort);
-
+    } finally {
       if (inputStream != null) {
         try {
           inputStream.close();
