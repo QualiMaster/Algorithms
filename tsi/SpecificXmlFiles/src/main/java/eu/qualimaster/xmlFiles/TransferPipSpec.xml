@@ -1,10 +1,10 @@
 <pipeline>
-	<name>FocusPip</name>
+	<name>TransferPip</name>
 	<command>
 		<name>addMarketplayer</name>
 		<request>
 			<field sequence="0">addMarketplayer</field>
-			<field sequence="1">f</field>
+			<field sequence="1">te</field>
 			<field sequence="2">%list%</field> <!-- comma-separated list of market player ids -->
 		</request>
 		<response>
@@ -17,7 +17,7 @@
 		<name>removeMarketplayer</name>
 		<request>
 			<field sequence="0">removeMarketplayer</field>
-			<field sequence="1">f</field>
+			<field sequence="1">te</field>
 			<field sequence="2">%listOfPairs%</field>
 		</request>
 		<response>
@@ -27,29 +27,20 @@
 		</response>
 	</command>
 	<command>
-		<name>changewindowSize</name>
+		<name>requestFinancialReplay</name>
 		<request>
-			<field sequence="0">changewindowSize</field>
-			<field sequence="1">f</field>
-			<field sequence="2">%windowSize%</field> <!-- int, window size in seconds -->
+			<field sequence="0">requestFinancialReplay</field>
+			<field sequence="1">te</field>
+			<field sequence="2">%start%</field>  <!-- boolean whether to start (true) or stop (false) the replaying-->
+			<field sequence="3">%ticket%</field> <!-- positive integer -->
+			<field sequence="4">%start_date%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="5">%end_date%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="6">%speed%</field> <!-- The replay speed (float) -->
+			<field sequence="7">%query%</field> <!-- Comma-separated list of market players. Not sure for this one, someone from L3S can verify it​ -->
 		</request>
 		<response>
-			<field sequence="0">changewindowSize_response</field>
+			<field sequence="0">requestFinancialReplay_response</field>
 			<field sequence="1">%status%</field>
-			<field sequence="2">%result%</field>
-		</response>
-	</command>
-	<command>
-		<name>changeCorrelationThreshold</name>
-		<request>
-			<field sequence="0">changeCorrelationThreshold</field>
-			<field sequence="1">f</field>
-			<field sequence="2">%threshold%</field> <!-- float, in [0.0,1.0] -->
-		</request>
-		<response>
-			<field sequence="0">changeCorrelationThreshold_response</field>
-			<field sequence="1">%status%</field>
-			<field sequence="2">%result%</field>
 		</response>
 	</command>
 </pipeline>
