@@ -39,6 +39,8 @@ public class Preprocessor implements IFPreprocessor {
       IIFPreprocessorPreprocessedStreamOutput iifPreprocessorPreprocessedStreamOutput)
       throws DefaultModeException {
 
+    iifPreprocessorPreprocessedStreamOutput.clear();
+
     if (terminating) return;
 
     String symbolData = iifPreprocessorSpringStreamInput.getSymbolTuple();
