@@ -82,10 +82,8 @@ public class TopoSoftwareCorrelationFinancial extends AbstractFinancialSubTopolo
     topologyBuilder.setBolt(prefix + "MapperBolt", new MapperBolt(mapperName, namespace, prefix), 1)
         .shuffleGrouping(input, streamId);
 
-    int parallelism_hint = PipelineOptions.getExecutorParallelism(config,
-                                                                  prefix + "." + hayashiYoshidaName,
-                                                                  4);
-    int tasks = PipelineOptions.getTaskParallelism(config, prefix + "." + hayashiYoshidaName, 4);
+    int parallelism_hint = PipelineOptions.getExecutorParallelism(config, prefix, 4);
+    int tasks = PipelineOptions.getTaskParallelism(config, prefix, 4); // or use parallelism_hint instead of constant
 
     topologyBuilder.setBolt(hayashiYoshidaName,
                             new HayashiYoshidaBolt(hayashiYoshidaName, namespace, true, streamId),
