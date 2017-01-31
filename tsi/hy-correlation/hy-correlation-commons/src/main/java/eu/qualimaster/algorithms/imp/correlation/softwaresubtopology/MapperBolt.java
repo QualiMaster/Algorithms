@@ -214,9 +214,14 @@ public class MapperBolt extends BaseSignalBolt {
     if (targetTasks == null || targetTasks.size() == 0) {
       logger.error("No target tasks!");
     } else {
+      if (id == null) {
+        logger.error("Trying to directly emit null value... Skipping...");
+        return;
+      }
       for (int target : targetTasks) {
         collector.emitDirect(target, "symbolsStream", tuple, new Values(id, timestamp, value));
       }
+
     }
   }
 
@@ -242,6 +247,14 @@ public class MapperBolt extends BaseSignalBolt {
       for (Pair<String, String> p : entry.getValue()) {
         String streamId0 = p.getKey();
         String streamId1 = p.getValue();
+        if (streamId0 == null) {
+          logger.error("Trying to directly emit null value... Skipping...");
+          return;
+        }
+        if (streamId1 == null) {
+          logger.error("Trying to directly emit null value... Skipping...");
+          return;
+        }
         collector.emitDirect(target, "configurationStream", tuple, new Values(streamId0, streamId1));
       }
       logger.info("Task " + target + "will calculate " + entry.getValue().size() + " pairs");
