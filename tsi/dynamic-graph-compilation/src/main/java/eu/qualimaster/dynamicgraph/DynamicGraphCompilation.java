@@ -42,19 +42,15 @@ public class DynamicGraphCompilation implements IFDynamicGraphCompilation {
       if (edges.add(edge)) {  // new Edge. Update the graph
         result.clear();
         result.setEdge(edge + "," + date + "," + time + "," + "1");
-        logger.info("Emitting NON-null edge");
       } else {
         result.noOutput();
-        logger.info("No output");
       }
     } else {
       if (edges.remove(edge)) {  // removed edge. Update the graph
         result.clear();
         result.setEdge(edge + "," + date + "," + time + "," + "0");
-        logger.info("Emitting NON-null edge");
       } else {
         result.noOutput();
-        logger.info("No output");
       }
     }
   }
