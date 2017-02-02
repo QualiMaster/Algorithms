@@ -8,11 +8,16 @@
 		    <field sequence="2">%second_market_player%</field>
 		    <field sequence="3">%date%</field>
 		    <field sequence="4">%time%</field>
-		    <field sequence="5">%action%</field>  <!-- addition(1) / removal(0) -->
+		    <field sequence="">%action%</field>  <!-- addition(1) / removal(0) -->
 		</response>
 		<response> <!-- Social output -->
 			<field sequence="0">suggestion_response</field>
-			<!-- More to be added here -->
+			<field sequence="1">%stock_id%</field>
+			<field sequence="2">%impact_value%</field>
+			<field sequence="3">%date%</field>
+			<field sequence="4">%time%</field>
+			<field sequence="5">%keywords%</field> <!-- list separated by ; -->
+			<field sequence="6">%related_stocks%</field> <!-- list separated by ; -->
 		</response>
 	</command>
 	<command>
