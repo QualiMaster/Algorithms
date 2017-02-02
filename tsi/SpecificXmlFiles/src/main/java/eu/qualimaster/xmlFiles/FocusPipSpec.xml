@@ -1,6 +1,21 @@
 <pipeline>
 	<name>FocusPip</name>
 	<command>
+		<name>default</name>
+		<response> <!-- graph output -->
+			<field sequence="0">resultsNodes_response</field>
+		    <field sequence="1">%first_market_player%</field>
+		    <field sequence="2">%second_market_player%</field>
+		    <field sequence="3">%date%</field>
+		    <field sequence="4">%time%</field>
+		    <field sequence="5">%action%</field>  <!-- addition(1) / removal(0) -->
+		</response>
+		<response> <!-- Social output -->
+			<field sequence="0">suggestion_response</field>
+			<!-- More to be added here -->
+		</response>
+	</command>
+	<command>
 		<name>addMarketplayer</name>
 		<request>
 			<field sequence="0">addMarketplayer</field>
@@ -40,14 +55,14 @@
 		</response>
 	</command>
 	<command>
-		<name>changeCorrelationThreshold</name>
+		<name>changecorrelationThreshold</name>
 		<request>
-			<field sequence="0">changeCorrelationThreshold</field>
+			<field sequence="0">changecorrelationThreshold</field>
 			<field sequence="1">f</field>
 			<field sequence="2">%threshold%</field> <!-- float, in [0.0,1.0] -->
 		</request>
 		<response>
-			<field sequence="0">changeCorrelationThreshold_response</field>
+			<field sequence="0">changecorrelationThreshold_response</field>
 			<field sequence="1">%status%</field>
 			<field sequence="2">%result%</field>
 		</response>

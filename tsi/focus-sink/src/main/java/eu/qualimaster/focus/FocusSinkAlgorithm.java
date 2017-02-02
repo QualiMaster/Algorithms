@@ -54,7 +54,7 @@ public class FocusSinkAlgorithm implements IFocusSink {
       return;
     }
     StringBuilder sb = new StringBuilder();
-    sb.append("focusPip,");
+    sb.append("focusPip,suggestion_response,");
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
@@ -82,7 +82,7 @@ public class FocusSinkAlgorithm implements IFocusSink {
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
-    sb.append("resultsNodes_response,f,").append(data.getEdge());
+    sb.append("resultsNodes_response,").append(data.getEdge());
 
     sendStr(sb.toString());
   }

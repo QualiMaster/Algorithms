@@ -1,5 +1,25 @@
-<pipeline>
+s<pipeline>
 	<name>TransferPip</name>
+	<command>
+		<name>default</name>
+		<response> <!-- transfer entropy output -->
+			<field sequence="0">te_response</field>
+		    <field sequence="1">%first_market_player%</field>
+		    <field sequence="2">%second_market_player%</field>
+		    <field sequence="3">%date%</field>
+		    <field sequence="4">%time%</field>
+		    <field sequence="5">%value%</field>
+		</response>
+		<response> <!-- replay response -->
+			<field sequence="0">te_replay_response</field>
+			<field sequence="1">%ticket%</field>
+		    <field sequence="2">%first_market_player%</field>
+		    <field sequence="3">%second_market_player%</field>
+		    <field sequence="4">%date%</field>
+		    <field sequence="5">%time%</field>
+		    <field sequence="6">%value%</field>
+		</response>
+	</command>
 	<command>
 		<name>addMarketplayer</name>
 		<request>

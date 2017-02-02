@@ -134,7 +134,9 @@ public class TransferSink implements ITransferSink, IDataSink {
     StringBuilder sb = new StringBuilder();
     sb.append("te,");
     if (ticket != -1) {
-      sb.append(ticket).append(",");
+      sb.append("te_replay_response,").append(ticket).append(",");
+    } else {
+      sb.append("te_response,");
     }
     sb.append(data.getId0()).append(",").append(data.getId1()).append(",").append(data.getDate())
         .append(",")
