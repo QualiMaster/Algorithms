@@ -301,6 +301,8 @@ public class SpringClient implements ISpringFinancialData {
     } catch (IOException e) {
       logger.warn("Tried to logout from the API, but something went wrong with the connection.");
       // Session will timeout an un-subscribe us anyway.
+    } catch (NullPointerException ex) {
+      // Ignore. Connector was already null
     }
     allSymbolsList = null;
     idsToNamesMap = null;
