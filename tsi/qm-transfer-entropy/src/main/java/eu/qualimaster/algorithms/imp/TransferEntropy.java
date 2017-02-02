@@ -90,51 +90,42 @@ public class TransferEntropy implements IFTransferEntropy {
 
   private boolean appendToOutputAndUpdateFlag(IIFTransferEntropyPairwiseFinancialOutput pairwiseFinancialResult,
     boolean firstOutput, TEPairStreaming pair) {
+
+    firstOutput =
+      appendToOutput(pairwiseFinancialResult, firstOutput, pair.getStreamY(), pair.getStreamX(), pair.getTEyx());
+
+    firstOutput =
+      appendToOutput(pairwiseFinancialResult, firstOutput, pair.getStreamX(), pair.getStreamY(), pair.getTExy());
+
+    return firstOutput;
+  }
+
+  private boolean appendToOutput(IIFTransferEntropyPairwiseFinancialOutput pairwiseFinancialResult, boolean firstOutput,
+    String first, String second, double te) {
     IIFTransferEntropyPairwiseFinancialOutput further;
-    String pairDirectedKey = pair.getStreamY() + "," + pair.getStreamX();
-    double lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.000000001;
-    // Default value different than 0 so we can divide
+    String pairDirectedKey = first + "," + second;
+    double lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.0;
 
-    if (Math.abs(pair.getTEyx() - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
-      lastEmitted.put(pairDirectedKey, pair.getTEyx());
+    if (lastEmittedValue != 0.0 && Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
+      lastEmitted.put(pairDirectedKey, te);
       if (firstOutput) {
-        pairwiseFinancialResult.setId0(pair.getStreamY());
-        pairwiseFinancialResult.setId1(pair.getStreamX());
+        pairwiseFinancialResult.setId0(first);
+        pairwiseFinancialResult.setId1(second);
         pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-        pairwiseFinancialResult.setValue(pair.getTEyx());
+        pairwiseFinancialResult.setValue(te);
         firstOutput = false;
       } else {
         further = pairwiseFinancialResult.addFurther();
-        further.setId0(pair.getStreamY());
-        further.setId1(pair.getStreamX());
+        further.setId0(first);
+        further.setId1(second);
         further.setDate(dateFormat.format(new Date()));
-        further.setValue(pair.getTEyx());
-      }
-    }
-
-    pairDirectedKey = pair.getStreamX() + "," + pair.getStreamY();
-    lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.000000001;
-    if (Math.abs(pair.getTExy() - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
-      lastEmitted.put(pairDirectedKey, pair.getTExy());
-      if (firstOutput) {
-        pairwiseFinancialResult.setId0(pair.getStreamX());
-        pairwiseFinancialResult.setId1(pair.getStreamY());
-        pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-        pairwiseFinancialResult.setValue(pair.getTExy());
-        firstOutput = false;
-      } else {
-        further = pairwiseFinancialResult.addFurther();
-        further.setId0(pair.getStreamX());
-        further.setId1(pair.getStreamY());
-        further.setDate(dateFormat.format(new Date()));
-        further.setValue(pair.getTExy());
+        further.setValue(te);
       }
     }
     return firstOutput;
   }
 
-  private static void addToPairs(HashMap<String, TEPairStreaming> allPairs, String id, String otherId,
-    TEPairStreaming pair) {
+  private void addToPairs(HashMap<String, TEPairStreaming> allPairs, String id, String otherId, TEPairStreaming pair) {
     String pairKey = getPairKey(id, otherId);
     allPairs.put(pairKey, pair);
   }
