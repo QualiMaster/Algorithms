@@ -1,4 +1,4 @@
-s<pipeline>
+<pipeline>
 	<name>TransferPip</name>
 	<command>
 		<name>default</name>
