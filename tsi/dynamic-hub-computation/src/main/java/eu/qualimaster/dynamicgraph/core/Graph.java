@@ -462,6 +462,9 @@ public class Graph {
    */
   private void updateWalksDeletion(int U, int V) {
     Node nodeU = nodes.get(U);
+    if(nodeU == null) {
+      return; // U is already deleted by some other update.
+    }
     if (nodeU.getNeighbors().size() == 1) { // V is the only neighbor of U
       int walksToUndo = nodeU.getNeighbors().get(V); // How many positive walks passed over V
       nodeU.setVisits(nodeU.getVisits() - walksToUndo);

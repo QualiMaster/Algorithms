@@ -166,6 +166,9 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   public void startQuote(String marketPlayerId) throws Exception {
+    if (!connected) {
+      return;
+    }
     if (connector.isLoggedIn()) {
       connector.sending = true;
       try {
@@ -181,6 +184,9 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   public void stopQuote(String marketPlayerId) throws Exception {
+    if (!connected) {
+      return;
+    }
     if (connector.isLoggedIn()) {
       connector.sending = true;
       try {
@@ -196,6 +202,9 @@ public class SpringClient implements ISpringFinancialData {
   }
 
   private void startQuoteAllAction() throws Exception {
+    if (!connected) {
+      return;
+    }
     if (connector.isLoggedIn()) {
       int count = connector.list.size();
       System.err.println(count);
@@ -246,7 +255,8 @@ public class SpringClient implements ISpringFinancialData {
 
     if (saveLocalData) {
       for (int i = 0; i < connector.list.size(); i++) {
-        String line = connector.list.get(i).toString();
+        String line = connector.list.get(i)
+                                    .toString();
         try {
           dataOutputController.saveQuoteData(line);
         } catch (Exception e) {
