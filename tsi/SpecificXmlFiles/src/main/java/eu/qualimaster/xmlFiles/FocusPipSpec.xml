@@ -62,12 +62,12 @@
 	<command>
 		<name>changecorrelationThreshold</name>
 		<request>
-			<field sequence="0">changecorrelationThreshold</field>
+			<field sequence="0">changeCorrelationThreshold</field>
 			<field sequence="1">f</field>
 			<field sequence="2">%threshold%</field> <!-- float, in [0.0,1.0] -->
 		</request>
 		<response>
-			<field sequence="0">changecorrelationThreshold_response</field>
+			<field sequence="0">changeCorrelationThreshold_response</field>
 			<field sequence="1">%status%</field>
 			<field sequence="2">%result%</field>
 		</response>
