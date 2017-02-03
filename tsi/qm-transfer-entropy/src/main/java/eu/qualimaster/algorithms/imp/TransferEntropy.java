@@ -106,7 +106,9 @@ public class TransferEntropy implements IFTransferEntropy {
     String pairDirectedKey = first + "," + second;
     double lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.0;
 
-    if (lastEmittedValue != 0.0 && Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
+    double abs = Math.abs(te);
+    if (lastEmittedValue == 0.0 || (abs > 0
+      && Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE)) {
       lastEmitted.put(pairDirectedKey, te);
       if (firstOutput) {
         pairwiseFinancialResult.setId0(first);
