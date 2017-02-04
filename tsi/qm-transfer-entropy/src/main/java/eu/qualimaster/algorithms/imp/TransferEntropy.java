@@ -106,22 +106,22 @@ public class TransferEntropy implements IFTransferEntropy {
     String pairDirectedKey = first + "," + second;
     Double lastEmittedValue = lastEmitted.get(pairDirectedKey);
 
-    double abs = Math.abs(te);
-    if (lastEmittedValue == null || (abs > 0
-      && Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE)) {
+    if (lastEmittedValue == null || Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
       lastEmitted.put(pairDirectedKey, te);
-      if (firstOutput) {
-        pairwiseFinancialResult.setId0(first);
-        pairwiseFinancialResult.setId1(second);
-        pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-        pairwiseFinancialResult.setValue(te);
-        firstOutput = false;
-      } else {
-        further = pairwiseFinancialResult.addFurther();
-        further.setId0(first);
-        further.setId1(second);
-        further.setDate(dateFormat.format(new Date()));
-        further.setValue(te);
+      if(Math.abs(te) > 0) {
+        if (firstOutput) {
+          pairwiseFinancialResult.setId0(first);
+          pairwiseFinancialResult.setId1(second);
+          pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
+          pairwiseFinancialResult.setValue(te);
+          firstOutput = false;
+        } else {
+          further = pairwiseFinancialResult.addFurther();
+          further.setId0(first);
+          further.setId1(second);
+          further.setDate(dateFormat.format(new Date()));
+          further.setValue(te);
+        }
       }
     }
     return firstOutput;
