@@ -51,6 +51,7 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
     // fields[3]: HH:mm:ss
     // fields[4]: 1 (addition) / 0 (deletion)
 
+    dataStreamResult.clear();
     String edge = input.getEdge();
 
     if (edge == null) {
@@ -71,26 +72,24 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
     }
     long time = date.getTime();
 
-    if (Integer.parseInt(fields[4]) == 0) {
+    if (fields[4].equals("0")) {
       // Deletion
       Edge toDelete = new Edge(fields[0], fields[1], time);
       logger.info("Deleting edge: " + toDelete.toString());
       emitDirect(toDelete, false, dataStreamResult);
     } else {
       // Addition
-      if (!indexedVertexIds.contains(fields[0])) {
+      if (indexedVertexIds.add(fields[0])) {
         // Add v0
         Vertex toAdd = new Vertex(fields[0], time);
         logger.info("Adding vertex: " + toAdd.toString());
         emitDirect(toAdd, true, dataStreamResult);
-        indexedVertexIds.add(fields[0]);
       }
-      if (!indexedVertexIds.contains(fields[1])) {
+      if (indexedVertexIds.add(fields[1])) {
         // Add v1
         Vertex toAdd = new Vertex(fields[1], time);
         logger.info("Adding vertex: " + toAdd.toString());
         emitDirect(toAdd, true, dataStreamResult);
-        indexedVertexIds.add(fields[1]);
       }
       // Add edge
       Edge toAdd = new Edge(fields[0], fields[1], time);
@@ -116,6 +115,6 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
     int taskId = (o instanceof Vertex) ? hv((Vertex) o, timeGraphTaskIds)
                                        : he((Edge) o, timeGraphTaskIds);
     result.setTaskId(taskId);
-    out.emitDirect("not necessary I hope", result);
+    out.emitDirect("nothing here", result);
   }
 }
