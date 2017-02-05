@@ -53,11 +53,12 @@ public class TopoSoftwareCorrelationFinancial extends AbstractFinancialSubTopolo
         // keep mapper at 1 and scale hyBolts
         // before we had oldExecutors, now we will have newExecutors
         Map<String, Integer> result = new HashMap<String, Integer>();
-        result.put(mapperName, 1); // always
         if (diffs) {
-          result.put(hayashiYoshidaName, newExecutors - oldExecutors - 1);
+          // do not diff the mapper, always 1
+          result.put(hayashiYoshidaName, newExecutors - oldExecutors); // all to HY
         } else {
-          result.put(hayashiYoshidaName, newExecutors - 1);
+          result.put(mapperName, 1); // always
+          result.put(hayashiYoshidaName, newExecutors - 1); // minus the mapper
         }
         return result;
       }

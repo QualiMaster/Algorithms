@@ -104,22 +104,24 @@ public class TransferEntropy implements IFTransferEntropy {
     String first, String second, double te) {
     IIFTransferEntropyPairwiseFinancialOutput further;
     String pairDirectedKey = first + "," + second;
-    double lastEmittedValue = lastEmitted.containsKey(pairDirectedKey) ? lastEmitted.get(pairDirectedKey) : 0.0;
+    Double lastEmittedValue = lastEmitted.get(pairDirectedKey);
 
-    if (lastEmittedValue != 0.0 && Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
+    if (lastEmittedValue == null || Math.abs(te - lastEmittedValue) / lastEmittedValue > RESULT_CHANGED_PERCENTAGE) {
       lastEmitted.put(pairDirectedKey, te);
-      if (firstOutput) {
-        pairwiseFinancialResult.setId0(first);
-        pairwiseFinancialResult.setId1(second);
-        pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
-        pairwiseFinancialResult.setValue(te);
-        firstOutput = false;
-      } else {
-        further = pairwiseFinancialResult.addFurther();
-        further.setId0(first);
-        further.setId1(second);
-        further.setDate(dateFormat.format(new Date()));
-        further.setValue(te);
+      if(Math.abs(te) > 0) {
+        if (firstOutput) {
+          pairwiseFinancialResult.setId0(first);
+          pairwiseFinancialResult.setId1(second);
+          pairwiseFinancialResult.setDate(dateFormat.format(new Date()));
+          pairwiseFinancialResult.setValue(te);
+          firstOutput = false;
+        } else {
+          further = pairwiseFinancialResult.addFurther();
+          further.setId0(first);
+          further.setId1(second);
+          further.setDate(dateFormat.format(new Date()));
+          further.setValue(te);
+        }
       }
     }
     return firstOutput;
