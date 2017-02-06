@@ -17,13 +17,14 @@ import java.util.Set;
 import gr.tuc.softnet.ap0n.graph.Edge;
 import gr.tuc.softnet.ap0n.graph.Vertex;
 
-import static utils.HashFunctions.he;
-import static utils.HashFunctions.hv;
+import static gr.softnet.timegraph.utils.HashFunctions.he;
+import static gr.softnet.timegraph.utils.HashFunctions.hv;
 
 /**
  * Created by ap0n on 25/11/2016.
  */
 public class TimeGraphMapper implements IFTimeGraphMapper {
+
   private Logger logger = LoggerFactory.getLogger(TimeGraphMapper.class);
   private List<Integer> timeGraphTaskIds;
   private Set<String> indexedVertexIds;
@@ -58,8 +59,6 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
       logger.warn("Null input.edge");
       dataStreamResult.noOutput();
       return;
-    } else {
-      logger.info("Not null input.edge");
     }
 
     String[] fields = edge.split(",");
@@ -75,25 +74,25 @@ public class TimeGraphMapper implements IFTimeGraphMapper {
     if (fields[4].equals("0")) {
       // Deletion
       Edge toDelete = new Edge(fields[0], fields[1], time);
-      logger.info("Deleting edge: " + toDelete.toString());
+//      logger.info("Deleting edge: " + toDelete.toString());
       emitDirect(toDelete, false, dataStreamResult);
     } else {
       // Addition
       if (indexedVertexIds.add(fields[0])) {
         // Add v0
         Vertex toAdd = new Vertex(fields[0], time);
-        logger.info("Adding vertex: " + toAdd.toString());
+//        logger.info("Adding vertex: " + toAdd.toString());
         emitDirect(toAdd, true, dataStreamResult);
       }
       if (indexedVertexIds.add(fields[1])) {
         // Add v1
         Vertex toAdd = new Vertex(fields[1], time);
-        logger.info("Adding vertex: " + toAdd.toString());
+//        logger.info("Adding vertex: " + toAdd.toString());
         emitDirect(toAdd, true, dataStreamResult);
       }
       // Add edge
       Edge toAdd = new Edge(fields[0], fields[1], time);
-      logger.info("Adding edge: " + toAdd.toString());
+//      logger.info("Adding edge: " + toAdd.toString());
       emitDirect(toAdd, true, dataStreamResult);
     }
   }
