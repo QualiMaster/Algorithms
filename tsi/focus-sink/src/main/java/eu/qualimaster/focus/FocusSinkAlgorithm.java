@@ -53,12 +53,17 @@ public class FocusSinkAlgorithm implements IFocusSink {
         .equals("")) {
       return;
     }
+	
+	logger.info("------++++------Focus Sink receives String: "+ data.getRecommendations());
+	
     StringBuilder sb = new StringBuilder();
     sb.append("focusPip,suggestion_response,");
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
     sb.append(data.getRecommendations());
+	
+	logger.info("------++++------Focus Sink sends String: "+ sb.toString());
 
     sendStr(sb.toString());
   }
