@@ -39,10 +39,15 @@ public class FocusSinkAlgorithm implements IFocusSink {
 
   public FocusSinkAlgorithm() {
     this.terminated = false;
+	System.out.println("------sys------FocusSinkAlgorithm is initiated);
+	logger.info("------------FocusSinkAlgorithm is initiated);
   }
 
   @Override
   public void postDataRecommendationStream(IFocusSinkRecommendationStreamInput data) {
+	System.out.println("------post_sys------Focus Sink receives String: "+ data.getRecommendations());
+	logger.info("------post------Focus Sink receives String: "+ data.getRecommendations());
+	
     emit(-1, data);
   }
 
@@ -54,6 +59,7 @@ public class FocusSinkAlgorithm implements IFocusSink {
       return;
     }
 	
+	System.out.println("------++++_sys------Focus Sink receives String: "+ data.getRecommendations());
 	logger.info("------++++------Focus Sink receives String: "+ data.getRecommendations());
 	
     StringBuilder sb = new StringBuilder();
@@ -81,6 +87,9 @@ public class FocusSinkAlgorithm implements IFocusSink {
     if (terminated || data == null || data.getEdge() == null || data.getEdge().equals("")) {
       return;
     }
+	
+	System.out.println("------financial------Focus Sink receives data");
+	logger.info("------financial------Focus Sink receives data");
 
     StringBuilder sb = new StringBuilder();
     sb.append("focusPip,");
