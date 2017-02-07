@@ -36,7 +36,7 @@ public class QueriesSource implements ITimeGraphQueriesSource {
     pathQueryType = "";
     pathQueryVertexA = "";
     pathQueryVertexB = "";
-    dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH.mm.ss");
+    dateFormat = new SimpleDateFormat("MM/dd/yyyy,HH:mm:ss");
     connected = false;
   }
 
@@ -106,12 +106,14 @@ public class QueriesSource implements ITimeGraphQueriesSource {
   @Override
   // TODO: Send a parameter change (-1,-1) to init this (the same values sent twice won't reach the spout)
   public void setParameterSnapshotQuery(String value) {
-    logger.info("Snapshot query received: " + value);
     if (value.equals("")) {
+      logger.info("Snapshot reset query received");
       start = -1;
       end = -1;
       return;
     }
+    logger.info("Snapshot query received: " + value);
+
     // value = "start,end" format = (MM/dd/yyyy,HH.mm.ss,MM/dd/yyyy,HH.mm.ss)
     String[] params = value.split(",");
     if (params.length != 4 && params.length != 2) {
@@ -134,13 +136,13 @@ public class QueriesSource implements ITimeGraphQueriesSource {
   @Override
   // TODO: Send a parameter change (-1,-1) to init this (the same values sent twice won't reach the spout)
   public void setParameterPathQuery(String value) {
-    logger.info("Path query received: " + value);
-
     if (value.equals("")) {
+      logger.info("Path reset query received");
       start = -1;
       end = -1;
       return;
     }
+    logger.info("Path query received: " + value);
 
     String[] params = value.split(",");
     if (params.length != 7) {
