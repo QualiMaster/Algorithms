@@ -62,37 +62,33 @@ public class TimeTravelSink implements ITimeTravelSink {
       sb.append(ticket).append(",");
     }
     sb.append(tuple.getSnapshot());
-
-    try {
-      writer.println(sb.toString());
-      writer.flush();
-      if (writer.checkError()) {
-        throw new Exception("Error writing to server.");
-      }
-    } catch (Exception e) {
-      logger.error("Not connected to results server. Reconnecting...");
-      try {
-        connect();
-        writer.println(sb.toString());
-        writer.flush();
-        if (writer.checkError()) {
-          throw new Exception("");
-        }
-      } catch (Exception ex) {
-        logger.error("Can't connect to results server.");
-        logger.error(ex.getMessage(), ex);
-      }
-    }
+    sendToServer(sb.toString());
   }
 
   @Override
   public void postDataPathStream(ITimeTravelSinkPathStreamInput data) {
-    logger.warn("post for pathStreamInput shouldn't have been called");
+    if (terminated) {
+      return;
+    }
+    emit(-1, data);
   }
 
   @Override
   public void emit(int ticket, ITimeTravelSinkPathStreamInput tuple) {
-    logger.warn("emit for pathStreamInput shouldn't have been called");
+    if (terminated) {
+      return;
+    }
+
+    logger.info("got path stream: " + tuple.getPath());
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("snapshots,");  // Server doesn't separate snapshots from paths (actually doesn't know
+                              // about paths).
+    if (ticket != -1) {
+      sb.append(ticket).append(",");
+    }
+    sb.append(tuple.getPath());
+    sendToServer(sb.toString());
   }
 
   @Override
@@ -125,6 +121,29 @@ public class TimeTravelSink implements ITimeTravelSink {
   @Override
   public Double getMeasurement(IObservable iObservable) {
     return null;
+  }
+
+  private void sendToServer(String result) {
+    try {
+      writer.println(result);
+      writer.flush();
+      if (writer.checkError()) {
+        throw new Exception("Error writing to server.");
+      }
+    } catch (Exception e) {
+      logger.error("Not connected to results server. Reconnecting...");
+      try {
+        connect();
+        writer.println(result);
+        writer.flush();
+        if (writer.checkError()) {
+          throw new Exception("");
+        }
+      } catch (Exception ex) {
+        logger.error("Can't connect to results server.");
+        logger.error(ex.getMessage(), ex);
+      }
+    }
   }
 
   private void readPropertiesFile() {
