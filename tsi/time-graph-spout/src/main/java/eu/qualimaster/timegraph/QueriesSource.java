@@ -85,7 +85,6 @@ public class QueriesSource implements ITimeGraphQueriesSource {
       pathQueryVertexA = "";
       pathQueryVertexB = "";
       pathQueryType = "";
-      logger.info(o.getVertexA() + " " + o.getVertexB() + " " + o.getType() + " " + o.getType() + " " + o.getStart() + " " + o.getEnd());
       return o;
     }
 
