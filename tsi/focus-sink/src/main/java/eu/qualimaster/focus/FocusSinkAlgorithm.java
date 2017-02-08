@@ -39,8 +39,8 @@ public class FocusSinkAlgorithm implements IFocusSink {
 
   public FocusSinkAlgorithm() {
     this.terminated = false;
-	System.out.println("------sys------FocusSinkAlgorithm is initiated);
-	logger.info("------------FocusSinkAlgorithm is initiated);
+	System.out.println("------sys------FocusSinkAlgorithm is initiated");
+	logger.info("------------FocusSinkAlgorithm is initiated");
   }
 
   @Override
