@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Created by ap0n on 8/2/2017.
  */
-public class SimulatedGraphData implements ISimulatedGraphData {
+public class SimulatedGraphDataAlgorithm implements ISimulatedGraphData {
 
   @Override
   public ISimulatedGraphDataEdgeStreamOutput getEdgeStream() {
