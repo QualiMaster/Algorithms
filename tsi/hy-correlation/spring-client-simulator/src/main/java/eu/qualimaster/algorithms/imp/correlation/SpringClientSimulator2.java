@@ -191,6 +191,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
     } else {
       result = "";
     }
+    logger.info("Aggregation key: " + result);
     return result;
   }
 
