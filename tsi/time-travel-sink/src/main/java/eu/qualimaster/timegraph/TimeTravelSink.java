@@ -54,10 +54,8 @@ public class TimeTravelSink implements ITimeTravelSink {
       return;
     }
 
-    logger.info("got snapshot stream: " + tuple.getSnapshot());
-
     StringBuilder sb = new StringBuilder();
-    sb.append("snapshots,");
+    sb.append("snapshots,snapshot_response");
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
@@ -79,10 +77,8 @@ public class TimeTravelSink implements ITimeTravelSink {
       return;
     }
 
-    logger.info("got path stream: " + tuple.getPath());
-
     StringBuilder sb = new StringBuilder();
-    sb.append("snapshots,");  // Server doesn't separate snapshots from paths (actually doesn't know
+    sb.append("snapshots,path_response,");  // Server doesn't separate snapshots from paths (actually doesn't know
                               // about paths).
     if (ticket != -1) {
       sb.append(ticket).append(",");
