@@ -99,6 +99,8 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
     logger.info("Path to Symbollist.txt: " + pathToSymbolList);
     logger.info("Path to data.txt: " + pathToData);
     //logger.info("Logs of aggregation keys are active");
+    logger.info("Using · as separator for term names");
+    logger.info("Also trying ï¿½");
   }
 
   private String newlineWithDateToNow(String line) {
