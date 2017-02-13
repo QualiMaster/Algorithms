@@ -1,6 +1,20 @@
 <pipeline>
 	<name>TimeTravelPip</name>
 	<command>
+		<name>default</name>
+		<response>
+			<field sequence="0">snapshot_response</field>
+			<field sequence="1">%snapshot%</field>  <!-- JSON string -->
+		</response>
+		<response>
+			<field sequence="0">path_response</field>
+			<field sequence="1">%path_found%</field>  <!-- 0/1 -->
+			<field sequence="2">%start_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="3">%end_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="4">%path%</field>  <!-- Path -->
+		</response>
+	</command>
+	<command>
 		<name>changesnapshotQuery</name>
 		<request>
 			<field sequence="0">changesnapshotQuery</field>
@@ -14,17 +28,20 @@
 		</response>
 	</command>
 	<command>
-		<name>default</name>
+		<name>changepathQuery</name>
+		<request>
+			<field sequence="0">changepathQuery</field>
+			<field sequence="1">tt</field>
+			<field sequence="2">%start_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="3">%end_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
+			<field sequence="4">%start_player_name%</field>
+			<field sequence="5">%end_player_name%</field>
+			<field sequence="6">%path_type%</field> <!-- SHORTEST / CONTINUOUS / EARLIEST /REACHABILITY -->
+		</request>
 		<response>
-			<field sequence="0">snapshot_response</field>
-			<field sequence="1">%snapshot%</field>  <!-- JSON string -->
-		</response>
-		<response>
-			<field sequence="0">path_response</field>
-			<field sequence="1">%path_found%</field>  <!-- 0/1 -->
-			<field sequence="1">%start_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
-			<field sequence="1">%end_timestamp%</field> <!-- MM/dd/yyyy,HH:mm:ss -->
-			<field sequence="1">%path%</field>  <!-- Path -->
+			<field sequence="0">changesnapshotQuery_response</field>
+			<field sequence="1">%status%</field>
+			<field sequence="2">%result%</field>
 		</response>
 	</command>
 </pipeline>
