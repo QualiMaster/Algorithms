@@ -98,7 +98,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
     pathToData = pathPrefix + "/" + dataFilename;
     logger.info("Path to Symbollist.txt: " + pathToSymbolList);
     logger.info("Path to data.txt: " + pathToData);
-    logger.info("Logs of aggregation keys are active");
+    //logger.info("Logs of aggregation keys are active");
   }
 
   private String newlineWithDateToNow(String line) {
@@ -192,7 +192,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
     } else {
       result = "";
     }
-    logger.info("Aggregation key: " + result);
+    //logger.info("Aggregation key: " + result);
     return result;
   }
 
@@ -357,7 +357,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
   @Override public Map<String, String> getIdsNamesMap() {
       // for demo scenario
       HashMap<String, String> map = new HashMap<String, String>();
-      map.put("1656", "NASDAQï¿½NFLXï¿½NoExpiry");
+      map.put("1656", "NASDAQ·NFLX·NoExpiry");
       return map;
   }
 
