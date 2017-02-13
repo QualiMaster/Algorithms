@@ -99,8 +99,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
     logger.info("Path to Symbollist.txt: " + pathToSymbolList);
     logger.info("Path to data.txt: " + pathToData);
     //logger.info("Logs of aggregation keys are active");
-    logger.info("Using · as separator for term names");
-    logger.info("Also trying ï¿½");
+    logger.info("Using - as separator for term names");
   }
 
   private String newlineWithDateToNow(String line) {
@@ -359,7 +358,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
   @Override public Map<String, String> getIdsNamesMap() {
       // for demo scenario
       HashMap<String, String> map = new HashMap<String, String>();
-      map.put("1656", "NASDAQ·NFLX·NoExpiry");
+      map.put("1656", "NASDAQ-NFLX-NoExpiry");
       return map;
   }
 
