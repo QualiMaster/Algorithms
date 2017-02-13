@@ -3,7 +3,7 @@ package eu.qualimaster.algorithms.imp.correlation.softwaresubtopology.commons;
 /**
  * Created by Apostolos Nydriotis on 10/7/14.
  */
-public class StreamTuple {
+public class StreamTuple implements java.io.Serializable {
 
   private double value;
   private long timestamp;

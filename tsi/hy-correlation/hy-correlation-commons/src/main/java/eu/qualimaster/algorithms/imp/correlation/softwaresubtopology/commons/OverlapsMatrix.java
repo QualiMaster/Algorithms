@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Apostolos Nydriotis on 10/20/14.
  */
-public class OverlapsMatrix {
+public class OverlapsMatrix implements java.io.Serializable {
 
   //     Map< <streamId, streamId>, Map< <intervalIndex, intervalIndex>, doOverlap>
   private Map<Pair<String, String>, Map<Pair<Integer, Integer>, Boolean>> overlaps;

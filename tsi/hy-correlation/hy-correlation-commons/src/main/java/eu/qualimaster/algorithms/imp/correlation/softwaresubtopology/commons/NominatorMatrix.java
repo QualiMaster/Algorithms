@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Apostolos Nydriotis on 10/21/14.
  */
-public class NominatorMatrix {
+public class NominatorMatrix implements java.io.Serializable {
 
   Map<Pair<String, String>, Double> nominators;  // The estimator's nominator for each pair
   // of streams

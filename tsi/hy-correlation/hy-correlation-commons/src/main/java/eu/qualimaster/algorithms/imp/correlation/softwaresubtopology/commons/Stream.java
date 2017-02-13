@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Apostolos Nydriotis on 10/9/14.
  */
-public class Stream {
+public class Stream implements java.io.Serializable {
 
   String id;
   List<Interval> intervals;

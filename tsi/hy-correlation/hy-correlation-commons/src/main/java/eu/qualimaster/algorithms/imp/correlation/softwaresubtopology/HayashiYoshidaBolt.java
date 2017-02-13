@@ -44,7 +44,7 @@ import backtype.storm.tuple.Values;
 public class HayashiYoshidaBolt extends BaseSignalBolt {
 
   private final String streamId;
-  private OutputCollector collector;
+  private transient OutputCollector collector;
   private String typeFlag;  // "w" or "f" for web or financial data
 
   private Logger logger = LoggerFactory.getLogger(HayashiYoshidaBolt.class);
@@ -68,7 +68,6 @@ public class HayashiYoshidaBolt extends BaseSignalBolt {
     } else {
       this.typeFlag = "w";
     }
-    terminating = false;
   }
 
   @Override
@@ -77,10 +76,21 @@ public class HayashiYoshidaBolt extends BaseSignalBolt {
     super.prepare(config, topologyContext, outputCollector);
     collector = outputCollector;
     taskId = topologyContext.getThisTaskId();
-    nominators = new NominatorMatrix();
-    overlapsMatrix = new OverlapsMatrix();
-    streams = new HashMap<>();
-    streamPairs = new HashSet<>();
+
+    terminating = false;
+    if (null == nominators) {
+        nominators = new NominatorMatrix();
+    }
+    if (null == overlapsMatrix) {
+        overlapsMatrix = new OverlapsMatrix();
+    }
+    if (null == streams) {
+        streams = new HashMap<>();
+    }
+    if (null == streamPairs) {
+        streamPairs = new HashSet<>();
+    }
+    
 //    try {
 //      logPrinter =
 //          new PrintWriter(new FileOutputStream(
