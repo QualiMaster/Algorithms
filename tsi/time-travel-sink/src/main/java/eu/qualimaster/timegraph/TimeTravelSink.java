@@ -55,7 +55,7 @@ public class TimeTravelSink implements ITimeTravelSink {
     }
 
     StringBuilder sb = new StringBuilder();
-    sb.append("snapshots,snapshot_response");
+    sb.append("snapshots,snapshot_response,");
     if (ticket != -1) {
       sb.append(ticket).append(",");
     }
