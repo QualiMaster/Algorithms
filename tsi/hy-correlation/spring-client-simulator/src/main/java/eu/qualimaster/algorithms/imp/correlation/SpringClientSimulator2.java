@@ -357,7 +357,7 @@ public class SpringClientSimulator2 implements ISimulatedFinancialData {
   @Override public Map<String, String> getIdsNamesMap() {
       // for demo scenario
       HashMap<String, String> map = new HashMap<String, String>();
-      map.put("1656", "NASDAQï¿½NFLXï¿½NoExpiry");
+      map.put("1656", "NASDAQ·NFLX·NoExpiry");
       return map;
   }
 
