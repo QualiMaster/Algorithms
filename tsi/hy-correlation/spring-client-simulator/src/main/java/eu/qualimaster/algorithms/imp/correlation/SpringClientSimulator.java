@@ -184,11 +184,15 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   @Override public String getAggregationKey(ISimulatedFinancialDataSpringStreamOutput tuple) {
     String result;
     String data = tuple.getSymbolTuple();
-    int pos = data.indexOf(",");
-    if (pos > 0) {
-      result = data.substring(0, pos);
-    } else {
+    if (data == null) {
       result = "";
+    } else {
+      int pos = data.indexOf(",");
+      if (pos > 0) {
+        result = data.substring(0, pos);
+      } else {
+        result = "";
+      }
     }
     return result;
   }
