@@ -8,6 +8,7 @@ import eu.qualimaster.algorithms.imp.correlation.softwaresubtopology.commons.Ove
 import eu.qualimaster.algorithms.imp.correlation.softwaresubtopology.commons.Stream;
 import eu.qualimaster.algorithms.imp.correlation.softwaresubtopology.commons.StreamTuple;
 
+
 import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,18 +50,21 @@ public class HayashiYoshida implements IFHayashiYoshida
     long windowStart;
     String streamId;
     long timestamp;
-    double value;    
+    double value; 
+    private boolean terminating;   
     
-    public HayashiYoshida() {    	   
+    public HayashiYoshida() {   
+    	terminating = false;
         nominators = new NominatorMatrix();
         overlapsMatrix = new OverlapsMatrix();
         streams = new HashMap<String, Stream>();
         streamPairs = new HashSet<Pair<String, String>>();
     }    
     
-    public void switchState(State arg0) {
-        // TODO Auto-generated method stub
-        
+    public void switchState(State state) {
+        if(state == State.TERMINATING) {
+        	terminating = true;
+        }
     }
 
     public Double getMeasurement(IObservable observable) {
@@ -73,10 +77,12 @@ public class HayashiYoshida implements IFHayashiYoshida
         //clear the previous cached result
         pairwiseFinancialResult.clear();
         
+        if (terminating) return;
+        
         streamId = input.getSymbolId();
         timestamp = input.getTimestamp();
-        value = input.getValue();
-
+        value = input.getValue();        
+        
         updateNominator(streamId, new StreamTuple(value, timestamp));
         
         //no pairwiseFinancialResult being returned
@@ -88,9 +94,16 @@ public class HayashiYoshida implements IFHayashiYoshida
         //clear the previous cached result
         pairwiseFinancialResult.clear();        
     	
-        streamPairs.add(new Pair<String, String>(input.getPairKey(),
-                input.getPairValue()));
+        if (terminating) return;
         
+        String key = input.getPairKey();
+        String value = input.getPairValue();
+        if(key != null && value != null) {
+        	if(key.length() == 0 && value.length() == 0 ) {
+        		streamPairs.add(new Pair<String, String>(input.getPairKey(),
+                input.getPairValue()));
+        	}
+        }
         //no pairwiseFinancialResult being returned
         pairwiseFinancialResult.noOutput();
     }
@@ -101,6 +114,8 @@ public class HayashiYoshida implements IFHayashiYoshida
         
         //clear the previous cached result
         pairwiseFinancialResult.clear();
+        
+        if (terminating) return;
         
         streamArray = new Stream[streams.size()];
         streams.values().toArray(streamArray);
@@ -130,6 +145,7 @@ public class HayashiYoshida implements IFHayashiYoshida
         Interval newInterval = currentStream.getInterval(currentStream.getIntervalsCount() - 1);
 
         for (Map.Entry<String, Stream> pair : streams.entrySet()) {
+        	if (terminating) return;
             String otherStreamId = pair.getKey();
 
             if (otherStreamId.equals(streamId)) {
@@ -174,6 +190,7 @@ public class HayashiYoshida implements IFHayashiYoshida
         for (int i = 0; i < streams.length; i++) {
             Stream s0 = streams[i];
             for (int j = i + 1; j < streams.length; j++) {
+            	if (terminating) return;
                 Stream s1 = streams[j];
     
                 if (!streamPairs.contains(new Pair<String, String>(s0.getId(), s1.getId()))
@@ -211,6 +228,7 @@ public class HayashiYoshida implements IFHayashiYoshida
     
     private void shiftWindow(long windowStart, Stream[] streams) {
         for (int i = 0; i < streams.length; i++) {
+        	if (terminating) return;
             Stream s0 = streams[i];
             for (Iterator<Interval> outerIt = s0.getIntervals().iterator(); outerIt.hasNext();) {
                 Interval outerInterval = outerIt.next();

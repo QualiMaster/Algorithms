@@ -104,7 +104,7 @@ public class Mapper implements IFMapper
             if (windowStart == 0) {
                 windowStart = timestamp;
             }
-            
+
             if(windowStart + windowSize > timestamp) {
                 resetWindowStreamResult.noOutput(); //no reset window stream result
             } else {
@@ -146,7 +146,8 @@ public class Mapper implements IFMapper
             IIFMapperSymbolsStreamOutput symbolsStreamResult,
             IIFMapperConfigurationStreamOutput configurationStreamResult,
             IIFMapperResetWindowStreamOutput resetWindowStreamResult) {
-        //clear the previous cached results
+
+    	//clear the previous cached results
         symbolsStreamResult.clear();
         configurationStreamResult.clear();
         resetWindowStreamResult.clear();
@@ -154,6 +155,7 @@ public class Mapper implements IFMapper
         allSymbols = input.getAllSymbols();
         
         if(!hasInitialized) {
+        	logger.info("Initializing the mapping...");
             hasInitialized = true;
             EmitMappingConfiguration(allSymbols, configurationStreamResult); //return configurationStreamResult
         } else {
@@ -177,21 +179,30 @@ public class Mapper implements IFMapper
         //return no output
         configurationStreamResult.noOutput();
         for (Map.Entry<Integer, List<Pair<String, String>>> entry : taskStreamPairsMapping.entrySet()) {
-            Integer target = entry.getKey();
+        	Integer target = entry.getKey();
             for (Pair<String, String> p : entry.getValue()) {
                 String streamId0 = p.getKey();
-                String streamId1 = p.getValue();
+                String streamId1 = p.getValue();                               
                 
-                //SUH                
-                //directly emit
-                //create new instance of result
-                IIFMapperConfigurationStreamOutput result = configurationStreamResult.createItem();
-                
-                result.setTaskId(target);//taskId for emitDirect
-                result.setPairKey(streamId0);
-                result.setPairValue(streamId1);
-                
-                configurationStreamResult.emitDirect("MapperConfigurationStream", result);
+                if(streamId0 != null && streamId1 != null) {
+                	if(streamId0.length() > 0 && streamId1.length() > 0) {
+		                //SUH                
+		                //directly emit
+		                //create new instance of result
+		                IIFMapperConfigurationStreamOutput result = configurationStreamResult.createItem();
+		                
+		                result.setTaskId(target);//taskId for emitDirect
+		                result.setPairKey(streamId0);
+		                result.setPairValue(streamId1);
+		                
+		                configurationStreamResult.emitDirect("MapperConfigurationStream", result);
+                	} else {
+                		logger.error("Empty key or value!"+ streamId0 + ", " + streamId1);
+                	}
+                	
+                } else {
+                	logger.error("Null key or value!");
+                }
                 //collector.emitDirect(target, "MapperConfigurationStream", new Values(result));
                 
                 //collector.emitDirect(target, "MapperConfigurationStream", new Values(streamId0, streamId1));
@@ -221,53 +232,54 @@ public class Mapper implements IFMapper
      * Partition the table to blocks by iterating each diagonal of the table
      */
     private void mapStreamsToTasks() {
-      String[] streamsArray = new String[streamTaskMapping.size()];
-      streamTaskMapping.keySet().toArray(streamsArray);
-      int taskIndex = 0;
+    	String[] streamsArray = new String[streamTaskMapping.size()];
+        streamTaskMapping.keySet().toArray(streamsArray);
+        int taskIndex = 0;
 
-      int taskCount = taskIds.size();
-      int streamsCount = streamsArray.length;
-      int blockDimension = (int) Math.ceil((double) streamsCount / (double) taskCount);
-      int diagonalsCount = (int) Math.ceil((double) streamsCount / (double) blockDimension);
+        int taskCount = taskIds.size();
+        int streamsCount = streamsArray.length;
+        int blockDimension = (int) Math.ceil((double) streamsCount / (double) taskCount);
+        int diagonalsCount = (int) Math.ceil((double) streamsCount / (double) blockDimension);
 
-      for (int d = 0; d < diagonalsCount; d++) {
-        for (int iBlockCtr = 0; iBlockCtr < diagonalsCount - d; iBlockCtr++) {
-          int jBlockCtr = iBlockCtr + d;
-          for (int i = iBlockCtr * blockDimension;
-               i < streamsCount && i < (iBlockCtr + 1) * blockDimension; i++) {
+        for (int d = 0; d < diagonalsCount; d++) {
+          for (int iBlockCtr = 0; iBlockCtr < diagonalsCount - d; iBlockCtr++) {
+            int jBlockCtr = iBlockCtr + d;
+            for (int i = iBlockCtr * blockDimension;
+                 i < streamsCount && i < (iBlockCtr + 1) * blockDimension; i++) {
 
-            for (int j = jBlockCtr == iBlockCtr ? i + 1 : jBlockCtr * blockDimension + 1;
-                 j < streamsCount && j < (jBlockCtr + 1) * blockDimension + 1;
-                 j++) {
+              for (int j = jBlockCtr == iBlockCtr ? i + 1 : jBlockCtr * blockDimension + 1;
+                   j < streamsCount && j < (jBlockCtr + 1) * blockDimension + 1;
+                   j++) {
 
-              streamTaskMapping.get(streamsArray[i]).add(taskIds.get(taskIndex));
-              streamTaskMapping.get(streamsArray[j]).add(taskIds.get(taskIndex));
+                streamTaskMapping.get(streamsArray[i]).add(taskIds.get(taskIndex));
+                streamTaskMapping.get(streamsArray[j]).add(taskIds.get(taskIndex));
 
-              if (!taskStreamPairsMapping.containsKey(taskIds.get(taskIndex))) {
-                taskStreamPairsMapping.put(taskIds.get(taskIndex),
-                                           new ArrayList<Pair<String, String>>());
+                if (!taskStreamPairsMapping.containsKey(taskIds.get(taskIndex))) {
+                  taskStreamPairsMapping.put(taskIds.get(taskIndex),
+                                             new ArrayList<Pair<String, String>>());
+                }
+                taskStreamPairsMapping.get(taskIds.get(taskIndex)).add(
+                    new Pair<String, String>(streamsArray[i], streamsArray[j]));
               }
-              taskStreamPairsMapping.get(taskIds.get(taskIndex)).add(
-                  new Pair<String, String>(streamsArray[i], streamsArray[j]));
+            }
+            if (++taskIndex == taskIds.size()) {
+              taskIndex = 0;
             }
           }
-          if (++taskIndex == taskIds.size()) {
-            taskIndex = 0;
-          }
         }
-      }
     }
     
     private void ForwardSymbol(String id, long timestamp, double value, IIFMapperSymbolsStreamOutput symbolsStreamResult) {  
         IIFMapperSymbolsStreamOutput further;
         boolean first = true;
         Set<Integer> targetTasks = streamTaskMapping.get(id);
-        if (targetTasks == null || targetTasks.size() == 0) {
-          logger.error("No target tasks!");
+        if (targetTasks == null || targetTasks.size() == 0 || id == null) {
+          logger.error("No target tasks! for the task: " + id);
           symbolsStreamResult.noOutput();//therefore no symbol stream result
         } else {
           //return no output
           symbolsStreamResult.noOutput();
+          
           for (int target : targetTasks) {
         	  //SUH
         	  //directly emit        	  
@@ -278,7 +290,7 @@ public class Mapper implements IFMapper
               result.setSymbolId(id);
               result.setTimestamp(timestamp);
               result.setValue(value);
-        	  
+              
         	  symbolsStreamResult.emitDirect("MapperSymbolsStream", result);
               //collector.emitDirect(target, "MapperSymbolsStream", new Values(result));
             
