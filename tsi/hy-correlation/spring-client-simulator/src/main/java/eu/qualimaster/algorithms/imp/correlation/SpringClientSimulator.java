@@ -267,7 +267,9 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
     try {
       while ((line = brForList.readLine()) != null) {
         //        String symbolId = value.replace((char) 65533, (char) 183);
+        if (line.isEmpty()) continue;
         allSymbolsList.add(line.replace((char) 65533, (char) 183));
+
       }
     } catch (IOException e) {
       logger.error("Simulator Error : " + e.getMessage());
