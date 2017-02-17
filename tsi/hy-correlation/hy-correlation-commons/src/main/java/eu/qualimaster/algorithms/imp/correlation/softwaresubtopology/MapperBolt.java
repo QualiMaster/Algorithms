@@ -206,6 +206,7 @@ public class MapperBolt extends BaseSignalBolt {
         }
       }
     }
+    logger.info("The mapping: " + streamTaskMapping);
   }
 
   private void ForwardSymbol(String id, long timestamp, double value, Tuple tuple) {  // tuple for anchoring
