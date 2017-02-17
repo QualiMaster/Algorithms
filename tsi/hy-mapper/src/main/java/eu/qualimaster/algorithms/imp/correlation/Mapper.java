@@ -104,6 +104,10 @@ public class Mapper implements IFMapper
             if (windowStart == 0) {
                 windowStart = timestamp;
             }
+            
+            if (windowSize == 0) {
+            	windowSize = 30 * 1000; //set to the default window size 30s, in case no window size is being set
+            }
 
             if(windowStart + windowSize > timestamp) {
                 resetWindowStreamResult.noOutput(); //no reset window stream result
