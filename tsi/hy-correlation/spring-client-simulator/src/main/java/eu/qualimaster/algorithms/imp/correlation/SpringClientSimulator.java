@@ -41,7 +41,7 @@ public class SpringClientSimulator implements ISimulatedFinancialData {
   FileSystem fs;
   // TODO: Call mappingChangedListener.notifyIdsNamesMapChanged(); when the mapping is changed
   IDataSourceListener mappingChangedListener;
-  private boolean useHdfs = true;
+  private boolean useHdfs = false;
   private String hdfsUrl = "";
   // /For HDFS
   private String pathToSymbolList, pathToData;
