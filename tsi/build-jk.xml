@@ -40,10 +40,10 @@
             <property name="remoteFolder" value="${maven.repository.uploadDir}/@{prefix}-@{folder}"/>
             <local name="connectString"/>
             <property name="connectString" value="${maven.repository.user}@${maven.repository.server}"/>
-            <sshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
+            <osshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
                 command="mkdir -p ${remoteFolder}"/>
 			<scp todir="${connectString}:${remoteFolder}" trust="true" keyfile="${maven.repository.keyfile}" file="${pomFile}"/>
-            <sshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
+            <osshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
                 command="./deployMvnPom.sh ${remoteFolder}"/>
 		</sequential>
 	</macrodef>
