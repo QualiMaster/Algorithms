@@ -42,7 +42,7 @@
             <property name="connectString" value="${maven.repository.user}@${maven.repository.server}"/>
             <osshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
                 command="mkdir -p ${remoteFolder}"/>
-			<scp todir="${connectString}:${remoteFolder}" trust="true" keyfile="${maven.repository.keyfile}" file="${pomFile}"/>
+	    <oscp todir="${connectString}:${remoteFolder}" trust="true" keyfile="${maven.repository.keyfile}" file="${pomFile}"/>
             <osshexec host="${maven.repository.server}" username="${maven.repository.user}" trust="true" keyfile="${maven.repository.keyfile}" 
                 command="./deployMvnPom.sh ${remoteFolder}"/>
 		</sequential>
